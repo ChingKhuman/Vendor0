@@ -154,7 +154,6 @@ const CustomSidebarMenu = (props) => {
       <Modal
     animationType="slide"
     transparent={true}
-
     visible={modalVisible}
     onRequestClose={() => {
       Alert.alert('Modal has been closed.');

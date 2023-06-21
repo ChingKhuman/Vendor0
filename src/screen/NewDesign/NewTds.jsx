@@ -2,15 +2,11 @@ import React, { useState,  useEffect } from 'react'
 import { View, Text, Modal, StyleSheet, Alert, FlatList, SectionList } from 'react-native';
 import Spinner from 'react-native-loading-spinner-overlay/lib';
 import { ScrollView } from 'react-native';
-import { ActivityIndicator } from 'react-native';
-import { Card } from 'react-native-paper';
-import Icon from 'react-native-vector-icons/MaterialIcons'
-import { TouchableOpacity } from 'react-native';
 import { useContext } from 'react';
 import { COLORS, SIZES } from '../../constants/theme';
 import { BASE_URL } from '../../constants/Config';
 import { AuthContext } from '../../context/AuthContext';
-import { SearchBar } from 'react-native-elements';
+
 
 const NewTds = ({navigation}) => {
 
@@ -172,43 +168,19 @@ const NewTds = ({navigation}) => {
         <View style={{ flexDirection: 'row' }}>
           
         </View>
-        {/* <TouchableOpacity onPress={() => navigation.navigate('Notification')}>
-             <View style={{ justifyContent: 'flex-end', paddingRight:20, flexDirection:'row', marginTop:10}}>
-                <Icon name="notifications-on" size={25} color='orange' />
-                <Text style={{color:'white', backgroundColor: 'red', borderRadius: 50, paddingHorizontal: 5,height:24,
-            position: 'relative', marginVertical: -10}}>0</Text>
-              </View>
-             </TouchableOpacity> */}
 
-<SearchBar
-        placeholder="Type Here..."
-         onChangeText={search}
-        // value={search}
-        style={{backgroundColor:'white',
-      paddingHorizontal: 100}}
-        
-      />
+<TextInput
+          style={styles.textInputStyle}
+        //   onChangeText={(text) => searchFilterFunction(text)}
+          value={search}
+          underlineColorAndroid="transparent"
+          placeholder="Search Here"
+        />
       </View>
       {/* <Spinner visible={loading} /> */}
       <ScrollView>
       {tds?.code === 500 ? Alert.alert('There is no TDS record right now') : (
         <>
-        
-            {/* {tdsData.map((item, index) => 
-              <View style={{paddingHorizontal: 20, paddingVertical: 15}} key={index}>
-               
-              <Card style={{backgroundColor: COLORS.green}}>
-                <Card.Content>
-                <IconAnt name="wallet" size={50} color= 'green' />
-               
-                  <Text style={styles.text1}>Invoice: {item.invoiceRefID}</Text>
-                  <Text style={styles.text1}>Counter: {item.counterParty}</Text>
-                  <Text style={styles.text1}>Amount: {item.transactionAmount}</Text>
-                  <Text style={styles.text1}>Date: {item.transactionDate}</Text>
-                </Card.Content>
-              </Card>
-              </View>
-            )} */}
             <View style={{flexDirection:'row', paddingHorizontal:5,paddingVertical: 20, borderWidth:1, borderColor:'black' }}>
               <Text style={styles.textTable}>InvoiceRefID</Text>
               <Text style={styles.textTable}>CounterParty</Text>
@@ -281,7 +253,6 @@ header: {
     fontFamily: 'serif',
     fontWeight: 'bold',
     fontSize: '10px'
-
   },
 
   content: {
@@ -300,7 +271,15 @@ header: {
     paddingHorizontal:10,
     fontSize: 15,
     color: 'black'
-  }
+  },
+  textInputStyle: {
+    height: 40,
+    borderWidth: 1,
+    paddingLeft: 20,
+    margin: 5,
+    borderColor: '#009688',
+    backgroundColor: '#FFFFFF',
+  },
 
 
 });
