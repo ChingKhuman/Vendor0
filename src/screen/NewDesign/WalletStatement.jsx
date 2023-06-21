@@ -1,8 +1,9 @@
-import { View, Text, Button, StyleSheet, TextInput, Modal, ScrollView } from 'react-native'
+import { View, Text, Button, StyleSheet, TextInput, Modal, ScrollView, TouchableOpacity } from 'react-native'
 import React, { useState } from 'react'
 import moment from "moment";
 import DateRangePicker from 'rnv-date-range-picker';
 import { Pressable } from 'react-native';
+
 
 
 export default function WalletStatement() {
@@ -73,7 +74,7 @@ export default function WalletStatement() {
     <>
 
       <View style={styles.container}>
-        <Text style={styles.text1}>WalletStatement</Text>
+        <Text style={styles.text1}>Wallet</Text>
         <View style={{ flexDirection: 'row', paddingHorizontal: 10 }}>
           <Text style={{ color: 'orange', fontSize: 13, }}> Home /  Wallet </Text>
           <Text style={{ fontSize: 13 }}> Statement</Text>
@@ -85,11 +86,14 @@ export default function WalletStatement() {
             borderWidth: 1, borderColor: 'black', width: '60%', height: "30%", marginLeft: 20, marginVertical: 30,
             flexDirection: 'row', marginHorizontal: 10
           }}>
-            <Text style={{ color: 'white', paddingHorizontal: 10 }}>From: {selectedRange.firstDate}</Text>
-            <Text style={{ color: 'white', }}>To: {selectedRange.secondDate}</Text>
+            <Text style={{ color: 'black', paddingHorizontal: 10 }}>From: {selectedRange.firstDate}</Text>
+            <Text style={{ color: 'black', }}>To: {selectedRange.secondDate}</Text>
           </View>
-
-          <Button title='Click' onPress={() => setModalVisible(true)} />
+<TouchableOpacity  onPress={() => setModalVisible(true)}>
+<Text style={{backgroundColor: 'blue', marginTop: 23,color: 'white', paddingVertical: 6, fontSize:17,
+borderRadius: 10}}> Seclect Date</Text>
+</TouchableOpacity>
+         
         </View>
       </View>
       <Modal animationType='slide'
@@ -126,6 +130,7 @@ export default function WalletStatement() {
           <Text style={{ height: 23, width: 35, backgroundColor: 'grey', marginLeft: 20, marginTop: 2 }}></Text>
           <Text> entries</Text>
         </View>
+        <Text style={{paddingHorizontal: 10}}>Download Pdf</Text>
         <TextInput
           style={styles.textInputStyle}
           //   onChangeText={(text) => searchFilterFunction(text)}
@@ -168,15 +173,16 @@ export default function WalletStatement() {
                 </View>
        </ScrollView>
   )}
-  <View style={{borderTopWidth: 1, borderTopColor: 'grey', paddingVertical:5}}>
+  <View style={{borderTopWidth: 1, borderTopColor: 'grey', paddingVertical:5, marginVertical: 10}}>
     <Text style={{color: 'black', fontSize: 13, paddingLeft: 5}}>Showing __ to __ entries</Text>
   </View>
       </View>
       
       <View style={styles.footer}>
-        <Text>
+      
+        <Text style={{ color: 'black', textAlign: 'center', fontWeight: 'bold', paddingTop: 10, fontFamily: 'Georgia' }}>Copyright @ 2021-2022<Text style={{ color: 'blue' }}>UpCap.</Text>All right Reserved.</Text>
 
-        </Text>
+      
 
       </View>
     </>
@@ -185,9 +191,9 @@ export default function WalletStatement() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 0.4,
-    backgroundColor: 'purple'
-
+    flex: 0.3,
+    
+    
   },
   headers: {
     flex: 1,
@@ -195,11 +201,11 @@ const styles = StyleSheet.create({
   },
   footer: {
     flex: 0.1,
-    backgroundColor: 'blue'
+    backgroundColor: 'white'
   },
   text1: {
     padding: 10,
-    marginTop: 25,
+    marginTop: 10,
     color: 'black',
     fontSize: 20
   },

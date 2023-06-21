@@ -6,6 +6,7 @@ import { AuthContext } from '../../context/AuthContext';
 import { BASE_URL } from '../../constants/Config';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { Card } from 'react-native-paper';
+import { VictoryPie } from 'victory-native';
 
 
 
@@ -58,6 +59,7 @@ const NewHome = ({ navigation }) => {
             then(function (myJson) {
                 let cont = myJson?.data.count;
                 setPieCount(cont);
+                console.log(cont)
                 let Color = ['green', 'blue', 'violet', '#92CDE2']
                 let colorData = cont.map((row, index) => {
                     return {
@@ -89,7 +91,7 @@ const NewHome = ({ navigation }) => {
             then(function (myJson) {
                 let cont = myJson?.data.amount;
                 setPieAmount(cont)
-                console.log('checking Data...........,', cont)
+                // console.log('checking Data...........,', cont)
 
                 let Color1 = ['red', 'blue', 'green', '#2C5AA2']
                 let colorData1 = cont.map((row, index) => {
@@ -187,18 +189,16 @@ const NewHome = ({ navigation }) => {
     }).start();
   };
 
-  function handleShow() {
-    setShow('Close')
-  }
+
+  //--------------------------Victory---------
+
+  const graphicData = [{ y: 10 }, { y: 50 }, { y: 40 }];
+const graphicColor = ['#388087', '#6fb3b8', '#badfe7'];
+
 
     return (
         <>
             <View style={styles.container}>
-                {/* <CustomHeader />           */}
-                {/* <Appbar.Header style={{backgroundColor: 'blue'}}>
-                    <Appbar.Content 
-                    title='Task'/>
-                </Appbar.Header> */}
 
             </View>
 
@@ -252,13 +252,17 @@ const NewHome = ({ navigation }) => {
                                     </View>
 
                                     <View style={styles.View10}>
-                                        <PieChart
+                                        {/* <PieChart
                                             widthAndHeight={widthAndHeight}
                                             series={[3, 2, 0, 1]}
                                             sliceColor={sliceColor}
                                             doughnut={true}
                                             coverRadius={0.45}
-                                            coverFill={'#FFF'} />
+                                            coverFill={'#FFF'} /> */}
+                                             <VictoryPie
+                                              data={graphicData} width={250} height={250} colorScale={graphicColor} innerRadius={50} />
+
+
                                     </View>
                                 </Card>
 
