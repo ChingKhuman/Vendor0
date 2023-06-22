@@ -6,7 +6,9 @@ import { AuthContext } from '../../context/AuthContext';
 import { BASE_URL } from '../../constants/Config';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { Card } from 'react-native-paper';
-import { VictoryPie } from 'victory-native';
+import { Slice, VictoryArea, VictoryAxis, VictoryBar, VictoryChart, VictoryLabel, VictoryLine, VictoryPie, VictoryTheme } from 'victory-native';
+import { Svg } from 'react-native-svg';
+import RadioForm from 'react-native-simple-radio-button';
 
 
 
@@ -59,7 +61,7 @@ const NewHome = ({ navigation }) => {
             then(function (myJson) {
                 let cont = myJson?.data.count;
                 setPieCount(cont);
-                console.log(cont)
+                console.log('checking the count', cont)
                 let Color = ['green', 'blue', 'violet', '#92CDE2']
                 let colorData = cont.map((row, index) => {
                     return {
@@ -171,30 +173,52 @@ const NewHome = ({ navigation }) => {
 
     const fadeAnim = useRef(new Animated.Value(0)).current;
 
-  const fadeIn = () => {
-    // Will change fadeAnim value to 1 in 5 seconds
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 5000,
-      useNativeDriver: true,
-    }).start();
-  };
+    const fadeIn = () => {
+        // Will change fadeAnim value to 1 in 5 seconds
+        Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 5000,
+            useNativeDriver: true,
+        }).start();
+    };
 
-  const fadeOut = () => {
-    // Will change fadeAnim value to 0 in 3 seconds
-    Animated.timing(fadeAnim, {
-      toValue: 0,
-      duration: 3000,
-      useNativeDriver: true,
-    }).start();
-  };
+    const fadeOut = () => {
+        // Will change fadeAnim value to 0 in 3 seconds
+        Animated.timing(fadeAnim, {
+            toValue: 0,
+            duration: 3000,
+            useNativeDriver: true,
+        }).start();
+    };
 
 
-  //--------------------------Victory---------
+    //--------------------------Victory---------
 
-  const graphicData = [{ y: 10 }, { y: 50 }, { y: 40 }];
-const graphicColor = ['#388087', '#6fb3b8', '#badfe7'];
+    const graphicColor = ['#388087', '#6fb3b8', '#badfe7', 'red']; // Colors
+    const wantedGraphicData = [{ y: 10 }, { y: 50 }, { y: 40 }]; // Data that we want to display
+    const defaultGraphicData = [-100, 0, 0, 100]; // Data used to make the animate prop work
 
+
+    const [graphicData, setGraphicData] = useState(defaultGraphicData);
+
+    useEffect(() => {
+        setGraphicData(countArray); // Setting the data that we want to display
+    }, []);
+
+
+    const [chart, setChart] = useState(0)
+
+    const radio_props = [
+        { label: 'Bar', value: 0 },
+        { label: 'Pie', value: 1 },
+        { label: 'Area', value: 2 }
+    ]
+
+    const radioProps = [
+        { label: 'Bar', value: 0 },
+        { label: 'Pie', value: 1 },
+        { label: 'Area', value: 2 }
+    ]
 
     return (
         <>
@@ -222,9 +246,20 @@ const graphicColor = ['#388087', '#6fb3b8', '#badfe7'];
                                 <Text style={styles.Text5}> Total Yield: {yieVal.totalYield}</Text>
 
                             </View>
+
+                            <View style={{ alignItems: 'center' }}>
+                                <RadioForm
+                                    radio_props={radio_props}
+                                    formHorizontal={true}
+                                    labelHorizontal={false}
+                                    buttonColor={'#2196f3'}
+                                    onPress={(value) => setChart(value)}
+                                />
+                            </View>
+                            <ScrollView>
                             <>
 
-                                <Card style={{ height: "40%", width: 350 }}>
+                                <Card style={{ height: "45%", width: 350 }}>
 
                                     <View style={{ alignItems: 'center' }}>
                                         <Text style={styles.Text4}>Offer Counts Details</Text>
@@ -252,15 +287,73 @@ const graphicColor = ['#388087', '#6fb3b8', '#badfe7'];
                                     </View>
 
                                     <View style={styles.View10}>
-                                        {/* <PieChart
-                                            widthAndHeight={widthAndHeight}
-                                            series={[3, 2, 0, 1]}
-                                            sliceColor={sliceColor}
-                                            doughnut={true}
-                                            coverRadius={0.45}
-                                            coverFill={'#FFF'} /> */}
-                                             <VictoryPie
-                                              data={graphicData} width={250} height={250} colorScale={graphicColor} innerRadius={50} />
+                                        <VictoryChart
+                                            height={250}
+                                            width={350}
+                                            theme={VictoryTheme.material}
+                                            domainPadding={{ x: 20 }}
+                                            animate={{
+                                                onLoad: { duration: 1000 },
+                                                duration: 1000,
+                                                easing: "bounce"
+                                            }}
+                                        >
+                                            {chart === 0
+                                                ? <VictoryBar
+                                                    style={{ data: { fill: "#c43a31" } }}
+                                                    data={pieCount}
+                                                    x='name'
+                                                    y='allOfferCount'
+                                                    colorScale={sliceColor}
+                                                    barRatio={0.8}
+                                                    animate={{
+                                                        onExit: {
+                                                            duration: 500,
+                                                            before: () => ({
+                                                                _y: 0,
+                                                                fill: "orange",
+                                                                label: "name"
+                                                            })
+                                                        }
+                                                    }}
+                                                    labelComponent={
+                                                        <VictoryLabel angle={90} verticalAnchor="middle" textAnchor="end" />
+                                                    }
+                                                />
+                                                : null
+                                            }
+                                            {chart === 1
+                                                ? <VictoryPie 
+                                                colorScale={sliceColor}
+                                                data={pieCount} x='name'
+                                                    y='allOfferCount' />
+                                                : null
+                                            }
+                                            {chart === 2
+                                                ? <VictoryArea data={pieCount} x='name'
+                                                    y='allOfferCount' 
+                                                    />
+                                                    
+                                                : null
+                                            }
+
+
+                                            <VictoryAxis
+                                                style={{
+                                                    axisLabel: { padding: 30 },
+
+
+                                                }}
+                                                colorScale={sliceColor}
+                                            />
+                                            <VictoryAxis dependentAxis
+
+                                                style={{
+                                                    axisLabel: { padding: 40 }
+                                                }}
+                                            />
+                                        </VictoryChart>
+
 
 
                                     </View>
@@ -270,12 +363,22 @@ const graphicColor = ['#388087', '#6fb3b8', '#badfe7'];
 
                             </>
 
+                            <View style={{ alignItems: 'center', marginTop: 10 }}>
+                                <RadioForm
+                                    radio_props={radioProps}
+                                    formHorizontal={true}
+                                    labelHorizontal={false}
+                                    buttonColor={'#2196f3'}
+                                    onPress={(value) => setChart(value)}
+                                />
+                            </View>
+
 
 
                             <Card style={{ height: "45%", width: 360, marginTop: 20 }}>
                                 <View style={{
                                     marginTop: 20, paddingHorizontal: 80
-                                    ,  borderColor: 'black'
+                                    , borderColor: 'black'
                                 }}>
                                     <Text style={styles.Text4}>Offer Amount Details</Text>
                                 </View>
@@ -294,17 +397,68 @@ const graphicColor = ['#388087', '#6fb3b8', '#badfe7'];
                                             </View>
                                         )}
                                         <View style={{ alignItems: 'center', paddingVertical: 20 }}>
+                                          
 
-                                            <PieChart
+                                            {/* <PieChart
                                                 widthAndHeight={widthAndHeight1}
                                                 series={[3, 2, 0, 1]}
                                                 sliceColor={sliceColor1}
                                                 doughnut={true}
                                                 coverRadius={0.45}
-                                                coverFill={'#FFF'} />
+                                                coverFill={'#FFF'} /> */}
+
+                                            <VictoryChart
+                                                height={250}
+                                                width={350}
+                                                theme={VictoryTheme.material}
+                                                domainPadding={{ x: 20 }}
+                                                
+                                            > 
+                                                {chart === 0
+                                                    ? <VictoryBar
+                                                        style={{ data: { fill: "#c43a31" } }}
+                                                        data={pieAmount}
+                                                        x='name'
+                                                        y='allOfferAmount'
+                                                        colorScale={sliceColor}
+                                                        barRatio={0.8}
+                                                       
+                                                    />
+                                                    : null
+                                                }
+                                                {chart === 1
+                                                    ? <VictoryPie
+                                                     data={pieAmount} x='name'
+                                                        y='allOfferAmount' />
+                                                    : null
+                                                }
+                                                {chart === 2
+                                                    ? <VictoryArea data={pieAmount} x='name'
+                                                        y='allOfferAmount' />
+                                                    : null
+                                                }
+
+
+                                                <VictoryAxis
+                                                    style={{
+                                                        axisLabel: { padding: 30 },
+                                                    }}
+                                                   
+                                                />
+                                                <VictoryAxis dependentAxis
+
+                                                    style={{
+                                                        axisLabel: { padding: 40 }
+                                                    }}
+                                                />
+                                            </VictoryChart>
+
+
+
                                         </View>
                                     </View></>
                             </Card>
+                            </ScrollView>
                         </View>
 
 
@@ -312,38 +466,42 @@ const graphicColor = ['#388087', '#6fb3b8', '#badfe7'];
                     </View>
                     <View style={styles.footer} >
 
-<Text style={{ color: 'black', textAlign: 'center', fontWeight: 'bold', paddingTop: 30, fontFamily: 'Georgia' }}>Copyright @ 2021-2022<Text style={{ color: 'blue' }}>UpCap.</Text>All right Reserved.</Text>
-</View>
-
-
+                    <Text style={{ color: 'black', textAlign: 'center', fontWeight: 'bold', paddingTop: 30, fontFamily: 'Georgia' }}>Copyright @ 2021-2022<Text style={{ color: 'blue' }}>UpCap.</Text>All right Reserved.</Text>
+                </View>
                 </ScrollView>
+                
+
+
+
             </View>
 
 
 
             <View style={styles.footer1}>
-                <View style={{flex:0.6}}>
-                    <Animated.View style={{opacity: fadeAnim}}>
-                    <TouchableOpacity style={{backgroundColor: 'powderblue',}}  onPress={()=> navigation.navigate('NewInvoice')}>
-                        <Text style={{textAlign:'center', paddingVertical: 10,color: 'black', fontSize: 20}}>Invest</Text>
-                    </TouchableOpacity>
+                <View style={{ flex: 0.6 }}>
+                    <Animated.View style={{ opacity: fadeAnim }}>
+                        <TouchableOpacity style={{ backgroundColor: 'powderblue', }} onPress={() => navigation.navigate('NewInvoice')}>
+                            <Text style={{ textAlign: 'center', paddingVertical: 10, color: 'black', fontSize: 20 }}>Invest</Text>
+                        </TouchableOpacity>
                     </Animated.View>
                 </View>
-                <View style={{flex:1, backgroundColor: 'orange', borderRadius: 30,}}>
-                    
-                               <TouchableOpacity onPress={fadeIn}>
-                               <Text style={{textAlign:'center', paddingTop: 8,
-                            fontSize: 30}}>Home</Text>
-                               </TouchableOpacity>
+                <View style={{ flex: 1, backgroundColor: 'orange', borderRadius: 30, }}>
+
+                    <TouchableOpacity onPress={fadeIn}>
+                        <Text style={{
+                            textAlign: 'center', paddingTop: 8,
+                            fontSize: 30
+                        }}>Home</Text>
+                    </TouchableOpacity>
                 </View>
-                <View style={{flex: 0.6}}>
-                               <Animated.View style={{opacity: fadeAnim}}>
-                               <TouchableOpacity   style={{backgroundColor: 'powderblue'}} onPress={()=> navigation.navigate('NewReport')}>
-                               <Text style={{textAlign:'center', paddingVertical: 10, color: 'black', fontSize: 20}}> Report</Text>
-           
-                               </TouchableOpacity>
-                               </Animated.View>
-                                    </View>
+                <View style={{ flex: 0.6 }}>
+                    <Animated.View style={{ opacity: fadeAnim }}>
+                        <TouchableOpacity style={{ backgroundColor: 'powderblue' }} onPress={() => navigation.navigate('NewReport')}>
+                            <Text style={{ textAlign: 'center', paddingVertical: 10, color: 'black', fontSize: 20 }}> Report</Text>
+
+                        </TouchableOpacity>
+                    </Animated.View>
+                </View>
             </View>
 
 
