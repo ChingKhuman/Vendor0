@@ -1,8 +1,10 @@
 import { View, Text, Button, StyleSheet, TextInput, Modal, ScrollView, TouchableOpacity } from 'react-native'
-import React, { useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import moment from "moment";
 import DateRangePicker from 'rnv-date-range-picker';
 import { Pressable } from 'react-native';
+import { AuthContext } from '../../context/AuthContext';
+import Pdf from 'react-native-pdf';
 
 
 
@@ -11,6 +13,7 @@ export default function WalletStatement() {
   const [selectedRange, setRange] = useState({});
   const [modalVisible, setModalVisible] = useState(false);
   const [search, setSearch] = useState()
+  const [table, setTable] = useState([])
 
   data = [{
     "invoiceRefID": "INVOICE1",
@@ -66,13 +69,50 @@ export default function WalletStatement() {
     "transactionAmount": "70350.00",
     "transactionDate": "08-04-2023"
   },
- 
-  
+
+
   ]
+
+  const { userInfo } = useContext(AuthContext);
+  // // console.log(userInfo)
+  const token = userInfo.data?.accessToken;
+
+
+  var myHeaders = new Headers();
+  myHeaders.append("Authorization", token);
+
+  var raw = "";
+
+  var requestOptions = {
+    method: 'GET',
+    headers: myHeaders,
+    body: raw,
+    redirect: 'follow'
+  };
+
+ const tabData= () => {
+  fetch("http://192.168.0.163:9902/transaction/report_statement/?from_date=2022-09-01T00:00:00.000Z&to_date=2023-06-22T11:35:24.091Z&_=1687433722983", requestOptions)
+  .then(function (response) {
+    return response.json();
+  }).
+  then(function (myJson) {
+    let tableData = myJson.data;
+    console.log("chcekthe data,,,,,,,,,,,,", tableData)
+    setTable(tableData)
+  })
+ 
+  .catch(error => console.log('error', error));
+ }
+
+ useEffect(() => {
+  tabData()
+ }, [])
+
+ const source = { uri: 'http://192.168.0.163:9902/transaction/report_statement/?from_date=2022-09-01T00:00:00.000Z&to_date=2023-06-22T11:35:24.091Z&_=1687433722983.pdf', cache: true };
 
   return (
     <>
-
+ <ScrollView>
       <View style={styles.container}>
         <Text style={styles.text1}>Wallet</Text>
         <View style={{ flexDirection: 'row', paddingHorizontal: 10 }}>
@@ -89,11 +129,13 @@ export default function WalletStatement() {
             <Text style={{ color: 'black', paddingHorizontal: 10 }}>From: {selectedRange.firstDate}</Text>
             <Text style={{ color: 'black', }}>To: {selectedRange.secondDate}</Text>
           </View>
-<TouchableOpacity  onPress={() => setModalVisible(true)}>
-<Text style={{backgroundColor: 'blue', marginTop: 23,color: 'white', paddingVertical: 6, fontSize:17,
-borderRadius: 10}}> Seclect Date</Text>
-</TouchableOpacity>
-         
+          <TouchableOpacity onPress={() => setModalVisible(true)}>
+            <Text style={{
+              backgroundColor: 'blue', marginTop: 23, color: 'white', paddingVertical: 6, fontSize: 17,
+              borderRadius: 10
+            }}> Seclect Date</Text>
+          </TouchableOpacity>
+
         </View>
       </View>
       <Modal animationType='slide'
@@ -130,7 +172,22 @@ borderRadius: 10}}> Seclect Date</Text>
           <Text style={{ height: 23, width: 35, backgroundColor: 'grey', marginLeft: 20, marginTop: 2 }}></Text>
           <Text> entries</Text>
         </View>
-        <Text style={{paddingHorizontal: 10}}>Download Pdf</Text>
+        <Text style={{ paddingHorizontal: 10 }}>Download Pdf</Text>
+        <Pdf
+                    source={source}
+                    onLoadComplete={(numberOfPages,filePath) => {
+                        console.log(`Number of pages: ${numberOfPages}`);
+                    }}
+                    onPageChanged={(page,numberOfPages) => {
+                        console.log(`Current page: ${page}`);
+                    }}
+                    onError={(error) => {
+                        console.log(error);
+                    }}
+                    onPressLink={(uri) => {
+                        console.log(`Link pressed: ${uri}`);
+                    }}
+                    style={styles.pdf}/>
         <TextInput
           style={styles.textInputStyle}
           //   onChangeText={(text) => searchFilterFunction(text)}
@@ -149,42 +206,43 @@ borderRadius: 10}}> Seclect Date</Text>
           <Text style={styles.textTable}>Balance</Text>
           <Text style={styles.textTable}>Remark</Text>
         </View>
-        {data?.map((item, index) =>
-       <ScrollView>
-         <View style={styles.content} key={index}>
-           <View style={{  }}>
-                    <Text style={[styles.text, { height: 25, fontSize: 10 }]}>{item.transactionDate}</Text>
-                  </View>
-                  <View style={{paddingHorizontal:10}}>
+        {table?.map((item, index) =>
+         
+            <View style={styles.content} key={index}>
+              <View style={{}}>
+                <Text style={[styles.text, { height: 25, fontSize: 10 }]}>{item.date}</Text>
+              </View>
+              <View style={{ paddingHorizontal: 10 }}>
 
-                    <Text style={[styles.text, { height: 25, fontSize: 10 }]}>{item.invoiceRefID}</Text>
-                  </View>
-                  <View style={{ paddingHorizontal:25 }}>
-                    <Text style={[styles.text, { height: 25, fontSize: 10 }]}>{item.counterParty}</Text>
-                  </View>
-                  <View style={{ paddingHorizontal:20 }}>
-                    <Text style={[styles.text, { height: 25, fontSize: 10 }]}>{item.transactionAmount}</Text>
-                  </View>
-                 
-                  <View style={{  }}>
-                    <Text style={[styles.text, { height: 25, fontSize: 10 }]}>{item.invoiceRefID}</Text>
-                  </View>
+                <Text style={[styles.text, { height: 25, fontSize: 10 }]}>{item.beneficiaryName}</Text>
+              </View>
+              <View style={{ paddingHorizontal: 25 }}>
+                <Text style={[styles.text, { height: 25, fontSize: 10 }]}>{item.debit}</Text>
+              </View>
+              <View style={{ paddingHorizontal: 20 }}>
+                <Text style={[styles.text, { height: 25, fontSize: 10 }]}>{item.balance}</Text>
+              </View>
 
-                </View>
-       </ScrollView>
-  )}
-  <View style={{borderTopWidth: 1, borderTopColor: 'grey', paddingVertical:5, marginVertical: 10}}>
-    <Text style={{color: 'black', fontSize: 13, paddingLeft: 5}}>Showing __ to __ entries</Text>
-  </View>
+              <View style={{}}>
+                <Text style={[styles.text, { height: 25, fontSize: 10 }]}>{item.remarks}</Text>
+              </View>
+
+            </View>
+         
+        )}
+        <View style={{ borderTopWidth: 1, borderTopColor: 'grey', paddingVertical: 5, marginVertical: 10 }}>
+          <Text style={{ color: 'black', fontSize: 13, paddingLeft: 5 }}>Showing __ to __ entries</Text>
+        </View>
       </View>
-      
+
       <View style={styles.footer}>
-      
+
         <Text style={{ color: 'black', textAlign: 'center', fontWeight: 'bold', paddingTop: 10, fontFamily: 'Georgia' }}>Copyright @ 2021-2022<Text style={{ color: 'blue' }}>UpCap.</Text>All right Reserved.</Text>
 
-      
+
 
       </View>
+      </ScrollView>
     </>
   )
 }
@@ -192,8 +250,8 @@ borderRadius: 10}}> Seclect Date</Text>
 const styles = StyleSheet.create({
   container: {
     flex: 0.3,
-    
-    
+
+
   },
   headers: {
     flex: 1,
@@ -222,18 +280,18 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: 'black'
   },
-  
+
   text: {
-   
+
     fontFamily: 'serif',
     fontWeight: 'bold',
     fontSize: '10px'
   },
   content: {
-  
+
     flexDirection: 'row',
     padding: 10,
     marginTop: 8,
-   
+
   },
 })

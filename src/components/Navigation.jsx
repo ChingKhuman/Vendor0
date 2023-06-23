@@ -23,6 +23,7 @@ import Icon2 from 'react-native-vector-icons/MaterialCommunityIcons'
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Lo from '../screen/Lo'
 import WalletStatement from '../screen/NewDesign/WalletStatement';
+import { View } from 'react-native';
 
 
 
@@ -72,9 +73,10 @@ const Drawer = createDrawerNavigator();
   function HomeDrawer() {
     return (
         <Drawer.Navigator
+      
         screenOptions={{
-            headerShown:'false',
-            drawerActiveBackgroundColor: 'grey',
+            headerShown:'true',
+            drawerActiveBackgroundColor: 'blue',
             drawerActiveTintColor:"#8DD2EA",
             drawerInactiveTintColor:"black",
             inactiveBackgroundColor: 'transparent',
@@ -84,15 +86,17 @@ const Drawer = createDrawerNavigator();
               marginLeft: 10,
             },
             headerStyle: {
-                backgroundColor: 'transparent',
+                backgroundColor: '#5B5FB6',
                 elevation: 0,
                 shadowOpacity: 0,
+                height: 60
             },
-            headerTitle: '',
+            headerTitle: 'Menu',
+            
             drawerStyle: {
               // backgroundColor: '#667EB8',
               borderWidth: 1,
-            borderColor: 'orange'
+            borderColor: 'white'
               
             },
             itemStyle: {marginVertical: 5,
@@ -100,6 +104,8 @@ const Drawer = createDrawerNavigator();
                   borderColor: 'white',
                   
                 },
+
+               
             
             // headerStyle: {
             //   backgroundColor: 'green', //Set Header color
@@ -109,8 +115,12 @@ const Drawer = createDrawerNavigator();
             //   fontWeight: 'bold', //Set Header text style
             // },
           }}
+         
           drawerContent={props => <CustomSidebarMenu {...props}
           labelStyle={{fontFamily: 'sans-serif', fontsize:40}}
+
+          
+       
            />}>
          <Drawer.Screen name="Home" component={NewHome}  options={{
         drawerLabelStyle:{
