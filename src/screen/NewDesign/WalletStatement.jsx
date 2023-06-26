@@ -4,7 +4,8 @@ import moment from "moment";
 import DateRangePicker from 'rnv-date-range-picker';
 import { Pressable } from 'react-native';
 import { AuthContext } from '../../context/AuthContext';
-import Pdf from 'react-native-pdf';
+import { Card } from 'react-native-paper';
+
 
 
 
@@ -97,7 +98,7 @@ export default function WalletStatement() {
   }).
   then(function (myJson) {
     let tableData = myJson.data;
-    console.log("chcekthe data,,,,,,,,,,,,", tableData)
+    // console.log("chcekthe data,,,,,,,,,,,,", tableData)
     setTable(tableData)
   })
  
@@ -108,7 +109,7 @@ export default function WalletStatement() {
   tabData()
  }, [])
 
- const source = { uri: 'http://192.168.0.163:9902/transaction/report_statement/?from_date=2022-09-01T00:00:00.000Z&to_date=2023-06-22T11:35:24.091Z&_=1687433722983.pdf', cache: true };
+ const source = { uri: 'http://192.168.0.163:9909/upcap/admin/WalletReport.pdf', cache: true };
 
   return (
     <>
@@ -172,8 +173,10 @@ export default function WalletStatement() {
           <Text style={{ height: 23, width: 35, backgroundColor: 'grey', marginLeft: 20, marginTop: 2 }}></Text>
           <Text> entries</Text>
         </View>
+
+        <TouchableOpacity style={{backgroundColor: 'green'}}>
         <Text style={{ paddingHorizontal: 10 }}>Download Pdf</Text>
-        <Pdf
+        {/* <Pdf
                     source={source}
                     onLoadComplete={(numberOfPages,filePath) => {
                         console.log(`Number of pages: ${numberOfPages}`);
@@ -187,7 +190,8 @@ export default function WalletStatement() {
                     onPressLink={(uri) => {
                         console.log(`Link pressed: ${uri}`);
                     }}
-                    style={styles.pdf}/>
+                    style={styles.pdf}/> */}
+        </TouchableOpacity>
         <TextInput
           style={styles.textInputStyle}
           //   onChangeText={(text) => searchFilterFunction(text)}
@@ -196,19 +200,21 @@ export default function WalletStatement() {
           placeholder="Search Here"
         />
 
-        <View style={{
+        <View>
+          <View style={{
           flexDirection: 'row', paddingHorizontal: 5, paddingVertical: 15,
           borderWidth: 1, borderColor: 'black'
         }}>
           <Text style={styles.textTable}>Date</Text>
-          <Text style={styles.textTable}>Benificiary</Text>
+          <Text style={styles.textTable}>Beneficiary</Text>
           <Text style={styles.textTable}>Investment</Text>
           <Text style={styles.textTable}>Balance</Text>
           <Text style={styles.textTable}>Remark</Text>
         </View>
         {table?.map((item, index) =>
          
-            <View style={styles.content} key={index}>
+           
+              <View style={styles.content} key={index}>
               <View style={{}}>
                 <Text style={[styles.text, { height: 25, fontSize: 10 }]}>{item.date}</Text>
               </View>
@@ -227,22 +233,27 @@ export default function WalletStatement() {
                 <Text style={[styles.text, { height: 25, fontSize: 10 }]}>{item.remarks}</Text>
               </View>
 
-            </View>
-         
+            </View> 
+                  
         )}
-        <View style={{ borderTopWidth: 1, borderTopColor: 'grey', paddingVertical: 5, marginVertical: 10 }}>
+         <View style={{ borderTopWidth: 1, borderTopColor: 'grey', paddingVertical: 5, marginVertical: 10 }}>
           <Text style={{ color: 'black', fontSize: 13, paddingLeft: 5 }}>Showing __ to __ entries</Text>
         </View>
+        </View>
+       
       </View>
 
+      
+      </ScrollView>
       <View style={styles.footer}>
+
+        
 
         <Text style={{ color: 'black', textAlign: 'center', fontWeight: 'bold', paddingTop: 10, fontFamily: 'Georgia' }}>Copyright @ 2021-2022<Text style={{ color: 'blue' }}>UpCap.</Text>All right Reserved.</Text>
 
 
 
       </View>
-      </ScrollView>
     </>
   )
 }
@@ -258,7 +269,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'pink'
   },
   footer: {
-    flex: 0.1,
+    flex: 0.2,
     backgroundColor: 'white'
   },
   text1: {

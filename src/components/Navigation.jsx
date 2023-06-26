@@ -24,6 +24,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import Lo from '../screen/Lo'
 import WalletStatement from '../screen/NewDesign/WalletStatement';
 import { View } from 'react-native';
+import PaginationView from '../screen/NewDesign/pagination/PaginationView';
 
 
 
@@ -205,6 +206,8 @@ const Navigation = () => {
                  <Stack.Screen name='Help' component={Help} options={{headerShown: false}}/>   
                  <Stack.Screen name='Profile' component={Profile} options={{headerShown: false}}/>   
                  <Stack.Screen name='WalletStatement' component={WalletStatement} options={{headerShown: true}}/>                 
+                 <Stack.Screen name='PaginationView' component={PaginationView} options={{headerShown: true}}/>                 
+                                     
                                          </>  
                  
         ):(

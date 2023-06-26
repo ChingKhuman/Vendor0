@@ -61,7 +61,7 @@ const NewHome = ({ navigation }) => {
             then(function (myJson) {
                 let cont = myJson?.data.count;
                 setPieCount(cont);
-                // console.log('checking the count', cont)
+            //   console.log('checking the count', cont)
                 let Color = ['green', 'blue', 'violet', '#92CDE2']
                 let colorData = cont.map((row, index) => {
                     return {
@@ -85,6 +85,13 @@ const NewHome = ({ navigation }) => {
         getData()
     }, []);
 
+//    const sortCount = pieCount.sort((r1, r2) => (r1.allOfferCount > r2.allOfferCount) ? 1 : (r1.allOfferCount < r2.allOfferCount) ? -1 : 0);
+const sortCount = pieCount.sort(function(a, b ){
+    return  a.allOfferCount - b.allOfferCount
+})
+
+    	// console.log(sortCount)
+
     const getData1 = () => {
         fetch(`${BASE_URL}/dashboard/dashboardsummary`, requestOptions)
             .then(function (response) {
@@ -93,7 +100,7 @@ const NewHome = ({ navigation }) => {
             then(function (myJson) {
                 let cont = myJson?.data.amount;
                 setPieAmount(cont)
-                console.log('checking Data...........,', cont)
+                // console.log('checking Data...........,', cont)
 
                 let Color1 = ['red', 'blue', 'green', '#2C5AA2']
                 let colorData1 = cont.map((row, index) => {
@@ -151,25 +158,25 @@ const NewHome = ({ navigation }) => {
     // countArray.push(parseInt(series1[i]));
     // var countArray = series1.map(Number)
 
-    var countArray = [];
-    series1.forEach(ele => countArray.push(+ele))
-    console.log(countArray)
+    // var countArray = [];
+    // series1.forEach(ele => countArray.push(+ele))
+    // console.log(countArray)
 
-    const sliceColor = ['green', 'blue', 'violet', '#92CDE2']
+     const sliceColor = ['green', 'blue', 'violet', '#92CDE2']
 
-    const widthAndHeight1 = 180
-    const SeriesA = pieAmount.map(i =>
-        i.totalOfferedAmount
-    )
-    var numberArray = SeriesA.map(Number);
-    // console.log(numberArray)
+    // const widthAndHeight1 = 180
+    // const SeriesA = pieAmount.map(i =>
+    //     i.totalOfferedAmount
+    // )
+    // var numberArray = SeriesA.map(Number);
+    // // console.log(numberArray)
 
-    var numberArray = [];
-    length = SeriesA.length;
-    for (var i = 0; i < length; i++)
-        numberArray.push(parseInt(SeriesA[i]));
+    // var numberArray = [];
+    // length = SeriesA.length;
+    // for (var i = 0; i < length; i++)
+    //     numberArray.push(parseInt(SeriesA[i]));
 
-    const sliceColor1 = ['red', 'blue', 'green', '#2C5AA2']
+     const sliceColor1 = ['red', 'blue', 'green', '#2C5AA2']
 
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const fadeIn = () => {
@@ -192,17 +199,6 @@ const NewHome = ({ navigation }) => {
 
 
     //--------------------------Victory---------
-
-    const graphicColor = ['#388087', '#6fb3b8', '#badfe7', 'red']; // Colors
-    const wantedGraphicData = [{ y: 10 }, { y: 50 }, { y: 40 }]; // Data that we want to display
-    const defaultGraphicData = [-100, 0, 0, 100]; // Data used to make the animate prop work
-
-
-    const [graphicData, setGraphicData] = useState(defaultGraphicData);
-
-    useEffect(() => {
-        setGraphicData(countArray); // Setting the data that we want to display
-    }, []);
 
 
     const [chart, setChart] = useState(0)
@@ -612,6 +608,7 @@ const NewHome = ({ navigation }) => {
                             toggleButton();
                         }}
                     >
+                        <TouchableOpacity onPress={() => navigation.navigate('NewInvoice')}>
                         <Animated.View
                             style={[
                                 {
@@ -627,6 +624,7 @@ const NewHome = ({ navigation }) => {
                         >
                             <Text style={{ fontSize: 30, color: 'black' }}>Invest</Text>
                         </Animated.View>
+                        </TouchableOpacity>
                     </TouchableOpacity>
                     <TouchableOpacity
                         activeOpacity={1}
@@ -639,6 +637,8 @@ const NewHome = ({ navigation }) => {
                             toggleButton();
                         }}
                     >
+                         <TouchableOpacity 
+                       onPress={() =>  navigation.navigate('NewReport')}>
                         <Animated.View
                             style={[
                                 {
@@ -654,6 +654,7 @@ const NewHome = ({ navigation }) => {
                         >
                             <Text style={{ fontSize: 30, color: 'black', }} > Reports</Text>
                         </Animated.View>
+                        </TouchableOpacity>
                     </TouchableOpacity>
                     <TouchableOpacity
                         activeOpacity={1}
@@ -669,20 +670,22 @@ const NewHome = ({ navigation }) => {
                             toggleButton();
                         }}
                     >
-                        <Animated.View
+                      
+                       <Animated.View
                             style={[
                                 {
-                                    borderRadius: 15,
+                                    borderRadius: 100,
                                     justifyContent: "center",
                                     alignItems: "center",
-                                    backgroundColor: "#3AB815",
+                                    
 
                                 },
                                 rotation
                             ]}
                         >
-                            <Text style={{ fontSize: 50, marginTop: -5, color: 'black' }} >+</Text>
+                            <Text style={{ fontSize: 80,margin: -40, color: 'black' }} >+</Text>
                         </Animated.View>
+                     
                     </TouchableOpacity>
                 </View>
         </>
