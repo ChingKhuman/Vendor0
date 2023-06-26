@@ -48,7 +48,7 @@
     "react-native-svg": "^13.9.0",
     "react-native-vector-icons": "^9.2.0",
     "react-navigation-drawer": "^2.7.2",
-    "react-router-dom": "^6.9.0",
+    "react-router-dom": "^6.11.2",
     "rnv-date-range-picker": "^1.2.6",
     "victory-native": "^36.6.11",
     "yup": "^1.1.1"
