@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { View, Text, Modal, StyleSheet, Alert, FlatList, SectionList, TextInput } from 'react-native';
+import { View, Text, Modal, StyleSheet, Alert } from 'react-native';
 import Spinner from 'react-native-loading-spinner-overlay/lib';
 import { ScrollView } from 'react-native';
 import { useContext } from 'react';
@@ -7,32 +7,39 @@ import { COLORS, SIZES } from '../../constants/theme';
 import { BASE_URL } from '../../constants/Config';
 import { AuthContext } from '../../context/AuthContext';
 import { Button } from 'react-native';
-import PaginationView from './pagination/PaginationView';
-import { TouchableOpacity } from 'react-native-gesture-handler';
-import { Searchbar } from 'react-native-paper';
+import { TextInput } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 
 
-const NewTds = ({ navigation }) => {
+
+const NewTds = () => {
 
 
 
   const [tds, setTds] = useState()
   const [tdsData, setTdsData] = useState([])
   const [loading, setLaoding] = useState(false)
-  const [current, setCurrent] = useState(1)
   const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortingOption, setSortingOption] = useState('default');
 
-  const goToPreviousPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
+
+
+
+
+
+  //---------------------Sorting-----------
+  const sortTableData = (option) => {
+
+
+    if (option === 'option1') {
+      tdsData?.sort((a, b) => a.transactionAmount - b.transactionAmount);
+    } else if (option === 'option2') {
+      tdsData?.sort((a, b) => b.transactionAmount - a.transactionAmount);
     }
+    setTdsData(tdsData);
   };
- 
-  const goToNextPage = () => {
-    setCurrentPage(currentPage + 1);
-  };
-
-
 
   const { userInfo } = useContext(AuthContext);
   // console.log(userInfo)
@@ -53,19 +60,12 @@ const NewTds = ({ navigation }) => {
     fetch(`${BASE_URL}/transaction/investor-tds-transaction`, requestOptions)
       .then(function (response) {
         return response.json()
-        // if (response.ok) {
-        //   return response.json();
-        // }
-        // throw new Error('Something went wrong.')
-
+      
       }).
       then(function (myJson) {
         let result = myJson
-        console.log('checkingTds', myJson)
-
         setTds(result)
-        setLaoding(false)
-        console.log(result)
+        setLaoding(false)  
 
       })
       .catch(function (error) {
@@ -88,32 +88,54 @@ const NewTds = ({ navigation }) => {
           return response.json();
         }
         throw new Error('Something went wrong.')
-
       }).
       then(function (myJson) {
         let result1 = myJson?.data
-          console.log('check transaction....', result1)
+        // console.log('check transaction....', result1)
         setTdsData(result1)
         setLaoding(false)
-        setFilteredDataSource(result1);
-        setMasterDataSource(result1);
+        
 
       })
       .catch(function (error) {
         console.warn('Request failed', error)
         setLaoding(false)
       })
-
   }
-
   useEffect(() => {
     getData1()
-  }, [current])
+
+  }, [])
+
+  //----------------------Search---------------------
 
 
-  const loadMoreItem = () => {
-    setCurrent(current + 1)
-  }
+  const filteredData = tdsData?.filter(item => item.counterParty.includes(searchQuery)) 
+
+
+
+  // --------------------Pagination-----------------------------
+
+
+  const totalItems = tdsData?.length; // Replace `data` with your actual data array
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const startIndex = (currentPage - 1) * itemsPerPage;
+const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+
+const tableData = tdsData?.slice(startIndex, endIndex);
 
   data = [{
     "invoiceRefID": "INVOICE1",
@@ -171,175 +193,87 @@ const NewTds = ({ navigation }) => {
   },
 
 
-  ]  
-
-  const [search, setSearch] = useState('');
-  const [filteredDataSource, setFilteredDataSource] = useState([]);
-  const [masterDataSource, setMasterDataSource] = useState([]);
-
-  const searchFilterFunction = (text) => {
-    // Check if searched text is not blank
-    if (text) {
-        // Inserted text is not blank
-        // Filter the masterDataSource
-        // Update FilteredDataSource
-        const newData = masterDataSource.filter(
-            function (item) {
-                const itemData = item.tranStatus
-                    ? item.tranStatus.toUpperCase()
-                    : ''.toUpperCase();
-                const textData = text.toUpperCase();
-                return itemData.indexOf(textData) > -1;
-            });
-        setFilteredDataSource(newData);
-        setSearch(text);
-    } else {
-        // Inserted text is blank
-        // Update FilteredDataSource with masterDataSource
-        setFilteredDataSource(masterDataSource);
-        setSearch(text);
-    }
-};
-
-const ItemView = ({ item }) => {
-    return (
-        // Flat List Item
-        <Text
-            style={styles.itemStyle}
-            onPress={() => getItem(item)}>
-            {item.id}
-            {'.'}
-            {item.tranStatus.toUpperCase()}
-        </Text>
-    );
-};
-
-const ItemSeparatorView = () => {
-    return (
-        // Flat List Item Separator
-        <View
-            style={{
-                height: 0.5,
-                width: '100%',
-                backgroundColor: '#C8C8C8',
-            }}
-        />
-    );
-};
-
-const getItem = (item) => {
-    // Function for click on an item
-    alert('Id : ' + item.id + ' Title : ' + item.title);
-};
-
-  const recordsPerPage = -5;
-  const lastIndex = currentPage * recordsPerPage;
-  const firstIndex =  lastIndex - recordsPerPage;
-  // const records = tdsData.slice(firstIndex, lastIndex);
-  const npage = Math.ceil(data.length / recordsPerPage)
-  const numbers = [...Array(npage + 1).keys()].slice(1)
-
-function perPage() {
- if(currentPage !== 1){
-  setCurrentPage(currentPage -1)
- }
-}
-
-function changePage() {
-setCurrentPage()
-}
-
-function nextPage() {
- if(currentPage !== npage) {
-  setCurrentPage(currentPage +1)
- }
-}
-
-
+  ]
 
   return (
 
     <>
 
+<TextInput
+        placeholder="Search"
+        value={searchQuery}
+        onChangeText={text => setSearchQuery(text)}
+      />
+
+<Picker
+        selectedValue={sortingOption}
+        onValueChange={(itemValue) => {
+          setSortingOption(itemValue);
+          sortTableData(itemValue);
+        }}
+      >
+        <Picker.Item label="Default" value="default" />
+        <Picker.Item label="Low to High Amount" value="option1" />
+        <Picker.Item label="High to Low Amount" value="option2" />
+        {/* Add more sorting options as needed */}
+      </Picker>
       <View style={styles.container}>
         <Text style={{ fontSize: SIZES.h1, padding: 7, textAlign: 'center', color: 'black' }}> TDS Transactions</Text>
       </View>
 
-      <View style={styles.header}>
-
-
-{/* 
-        <TextInput
-          style={styles.textInputStyle}
-          //   onChangeText={(text) => searchFilterFunction(text)}
-          value={search}
-          underlineColorAndroid="transparent"
-          placeholder="Search Here"
-        /> */}
-         <Searchbar
-                        placeholder="Type Here..."
-                        onChangeText={(text) => searchFilterFunction(text)}
-                        value={search}
-                    />
+      <View style={styles.header}>   
 
         <ScrollView>
           {tds?.code === 500 ? Alert.alert('There is no TDS record right now') : (
             <>
-              <View style={{ flexDirection: 'row',paddingLeft: 10, paddingVertical: 20, borderWidth: 1, borderColor: 'black' }}>
-                <Text style={styles.textTable}>REFID</Text>
-                <Text style={styles.textTable}>COUNTER PARTY</Text>
-                <Text style={styles.textTable}>TRANS AMT</Text>
-                <Text style={styles.textTable}>TRANS DATE</Text>
+              <View style={styles.tableRow}>
+                <Text  style={styles.tableHeader}>REFID</Text>
+                <Text  style={styles.tableHeader}>COUNTER PARTY</Text>
+                <Text  style={styles.tableHeader}>TRANS AMT</Text>
+                <Text  style={styles.tableHeader}>TRANS DATE</Text>
               </View>
-              {tdsData?.map((item, index) =>
+              {/* {tableData?.map((item, index) => */}
+              {filteredData?.map((item, index) =>
                 <>
-                  <>
-                    <View style={styles.content} key={index}>
-                      <View style={{ paddingHorizontal: 10, paddingBottom: 10 }}>
+                  
+                    <View style={styles.tableRow}>
+                      
 
-                        <Text style={[styles.text, { height: 50, fontSize: 15 }]}>{item.invoiceRefID}</Text>
-                      </View>
-                      <View style={{ paddingHorizontal: 10, width: '25%',height: 60,  }}>
-                        <Text style={[styles.text, {  fontSize: 15,
-                       }]}>{item.counterParty}</Text>
-                      </View>
-                      <View style={{paddingHorizontal: 10, width: '25%' }}>
-                        <Text style={[styles.text, { height: 30, fontSize: 17 }]}>{item.transactionAmount}</Text>
-                      </View>
-                      <View style={{ width: '25%' }}>
-                        <Text style={[styles.text, { height: 30, fontSize: 17 }]}>{item.transactionDate}</Text>
-                      </View>
+                        <Text style={styles.tableCell}>{item.invoiceRefID}</Text>
+                    
+                     
+                        <Text style={styles.tableCell}>{item.counterParty}</Text>
+                          
+                         <Text style={styles.tableCell}>{item.transactionAmount}</Text>
+                       
+            
+                        <Text style={styles.tableCell}>{item.transactionDate}</Text>
+                        
+                   
 
-                    </View></>
+                    </View>
                 </>
               )}
-
 
             </>
           )
           }
-
-          <PaginationView page={currentPage} />
           <View style={{
             flexDirection: 'row', justifyContent: 'flex-end', marginHorizontal: 10,
             paddingRight: 10
           }}>
-            <Button title="Prev" onPress={perPage} disabled={currentPage === 1} />
-            {
-              numbers.map((n, i) => (
-               
-               <View 
-
-             {...currentPage === n ? 'active' : ''}>
-                  <TouchableOpacity onPress={() => changePage(n)}>{n}</TouchableOpacity>
-                  </View>
-              ))
-            }
-            <Button title="Next" onPress={nextPage} />
+            <View style={{flexDirection: 'row', justifyContent: 'flex-end', 
+          padding: 5}}>
+      <Button onPress={handlePrevPage} disabled={currentPage === 1} title='prev'/>
+      <Text style={{paddingTop: 7, paddingHorizontal: 4}}>Page {currentPage} of {totalPages}</Text>
+      <Button onPress={handleNextPage} disabled={currentPage === totalPages} title='Next'/>
+    </View>
           </View>
+
+
         </ScrollView>
       </View>
-      {/* <Spinner visible={loading} /> */}
+      <Spinner visible={loading} />
 
 
       <View>
@@ -349,8 +283,6 @@ function nextPage() {
         <Text style={{ color: 'black', textAlign: 'center', fontWeight: 'bold', paddingTop: 10, fontFamily: 'Georgia' }}>Copyright @ 2021-2022<Text style={{ color: 'blue' }}>UpCap.</Text>All right Reserved.</Text>
 
       </View>
-
-
     </>
 
   )
@@ -363,17 +295,42 @@ const styles = StyleSheet.create({
   },
   header: {
     flex: 1.8,
-    alignItems: 'center',
+  
 
     backgroundColor: 'white',
     borderWidth: 1,
     borderColor: 'black'
 
   },
+  tableRow: {
+    flexDirection: 'row',
+  },
+  tableHeader: {
+    flex: 1,
+    padding: 5,
+    fontWeight: 'bold',
+    borderWidth: 1,
+    borderColor: '#000',
+  },
+  tableCell: {
+    flex: 1,
+    padding: 5,
+    paddingHorizontal: 10,
+  
+    borderWidth: 1,
+    borderColor: '#000',
+  },
   footer:
   {
     flex: 0.2,
     backgroundColor: 'white',
+  },
+  title: {
+    width: "100%",
+    marginTop: 20,
+    fontSize: 25,
+    fontWeight: "bold",
+    marginLeft: "10%",
   },
 
   text: {
@@ -408,7 +365,26 @@ const styles = StyleSheet.create({
     borderColor: '#009688',
     backgroundColor: '#FFFFFF',
   },
+  list__container: {
+    margin: 10,
+    height: "85%",
+    width: "100%",
+  },
+  item: {
+    margin: 30,
+    borderBottomWidth: 2,
+    borderBottomColor: "lightgrey"
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 5,
+    fontStyle: "italic",
+  },
 
 
 });
 export default NewTds;
+
+
+

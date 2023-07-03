@@ -160,6 +160,10 @@ android {
 
         }
     }
+
+      dexOptions {
+      jumboMode = true
+  }
 }
 
 dependencies {
@@ -179,6 +183,7 @@ dependencies {
     } else {
         implementation jscFlavor
     }
+    //   compile project(':react-native-pdf-lib')
 }
 
 task wrapper(type: Wrapper){

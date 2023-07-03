@@ -1,99 +1,59 @@
-import { View, Text,StyleSheet,TouchableOpacity } from 'react-native'
+import {  StyleSheet } from 'react-native'
 import React from 'react'
-import CustomHeader from '../../components/CustomHeader'
-import Icon1 from 'react-native-vector-icons/Entypo'
-import { Card } from 'react-native-paper';
-import { COLORS } from '../../constants/theme'
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import NewFunding from './NewFunding';
+import NewSettlement from './NewSettlement';
+import NewTds from './NewTds';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 
-export default function NewReports({navigation}) {
+const Tab = createBottomTabNavigator();
+
+const screenOptions = ({ route }) => ({
+ 
+    tabBarIcon: ({ color, size }) => {
+      let iconName;
+  
+      if (route.name === 'Funding') {
+        iconName = 'retweet';
+      } else if (route.name === 'Settlement') {
+        iconName = 'tasks';
+      }
+      else if (route.name === 'Tds'){
+        iconName = 'check-circle'
+      }
+  
+      return <Icon name={iconName} size={size} color={color} />;
+    },
+  });
+
+const CustomTab = () => (
+   
+  <Tab.Navigator screenOptions={screenOptions}
+    tabBarOptions={{
+      activeTintColor: '#fff',
+      inactiveTintColor: 'lightgray',
+      activeBackgroundColor: 'red',
+      inactiveBackgroundColor: 'grey',
+          style: {
+                backgroundColor: '#CE4418',
+                paddingBottom: 3
+          }
+   }}>
+    
+         <Tab.Screen name="Funding" component={NewFunding} options={{ headerShown: false, tabBarStyle: "20%" }} />
+         <Tab.Screen name="Settlement" component={NewSettlement} options={{ headerShown: false, tabBarStyle: "20%" }} />
+         <Tab.Screen name="Tds" component={NewTds} options={{ headerShown: false, tabBarStyle: "20%" }} />
+      </Tab.Navigator>
+);
+
+export default function NewReports() {
+
     return (
 
-        <>
+        <CustomTab />
 
-            <View style={styles.container}>
-                {/* <CustomHeader /> */}
-
-            </View>
-            <View style={styles.headers}>
-                <Text>Design in Progress</Text>
-             
-
-              <View style={{paddingVertical: 20}}>
-              <TouchableOpacity onPress={() => navigation.navigate('Funding')}>
-              <Card style={{backgroundColor: COLORS.green, height: 170,width:300, alignItems: 'center',
-            justifyContent: 'center'}}>             
-             <Card.Content>
-             {/* <IconAnt name="wallet" size={50} color= 'green' /> */}
-            <Text style={{color: 'white', alignItems: 'center', fontSize:20}}>Funding</Text>           
-             </Card.Content>
-           </Card>
-              </TouchableOpacity>
-              </View>
-
-              <TouchableOpacity onPress={() => navigation.navigate('NewSettlement')}>
-              <View style={{paddingVertical:20}}>             
-              <Card style={{backgroundColor: COLORS.green, height: 170,width:300, alignItems: 'center',
-            justifyContent: 'center'}}>             
-             <Card.Content>
-             {/* <IconAnt name="wallet" size={50} color= 'green' /> */}
-            <Text style={{color:'white', fontSize:20}}>Settlement</Text>           
-             </Card.Content>
-           </Card>
-           </View>
-              </TouchableOpacity>   
-
-              <View>
-          <TouchableOpacity onPress={() => navigation.navigate('NewTds')}>
-          <Card style={{backgroundColor: COLORS.green, height: 170,width:300, justifyContent:'center',alignItems:'center'}}>        
-        <Card.Content>
-        {/* <IconAnt name="wallet" size={50} color= 'green' /> */}
-       <Text style={{color:'white', fontSize:20}}>TDS</Text>
       
-        </Card.Content>
-      </Card>
-          </TouchableOpacity>
-              
-               
-                </View>
-               
-            </View>
-
-            {/* <View style={styles.footer}>
-
-                <View style={{ flexDirection: 'row', paddingVertical: 10 }}>
-
-
-                    <View style={{ borderWidth: 1, borderColor: 'black', padding: 10 }}>
-                        <TouchableOpacity onPress={()=> navigation.navigate('NewHome')}>
-                            <Text>
-                                Dashboard
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-
-                    <View style={{ paddingHorizontal: 50 }}>
-                        <Icon1 name='archive' size={40} color='black' />
-                    </View>
-
-                    <View style={{ borderWidth: 1, borderColor: 'black', padding: 10 }}>
-                        <TouchableOpacity onPress={()=> navigation.navigate('NewInvoice')}>
-                            <Text>Invest</Text>
-                        </TouchableOpacity>
-                    </View>
-
-                </View>
-
-            </View> */}
-
-
-
-
-
-
-        
-
-        </>
     )
 }
 

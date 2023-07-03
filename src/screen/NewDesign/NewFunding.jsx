@@ -4,14 +4,15 @@ import Spinner from "react-native-loading-spinner-overlay/lib";
 import { AuthContext } from '../../context/AuthContext';
 import { BASE_URL } from '../../constants/Config';
 import { COLORS } from '../../constants/theme';
+import { Card } from 'react-native-paper';
 
 
 
 
-const NewFunding = ({navigation}) => {
+const NewFunding = () => {
 
     const [fund, setFund] = useState([]);
-    const {  userInfo } = useContext(AuthContext);
+    const { userInfo } = useContext(AuthContext);
     const [loading, setLoading] = useState(false)
     // console.log(userInfo)
     const token = userInfo.data?.accessToken;
@@ -44,7 +45,7 @@ const NewFunding = ({navigation}) => {
             })
 
     }
-   useEffect(() => {
+    useEffect(() => {
         getData()
     }, [])
 
@@ -72,89 +73,90 @@ const NewFunding = ({navigation}) => {
         "invoicePaymentDue": "24-4-2023",
         "expectedRepaymentAmount": "Rs 1,03,136.78"
     },
-    
-]
-  
+
+    ]
+
     return (
 
-      <>
-          <View style={styles.container}>
-         
-            <Text style={{alignItems: 'center', color: 'black', textAlign: 'center',
-        fontSize: 30, marginTop: 10
-       }}> FUNDING </Text>
+        <>
+            <View style={styles.container}>
+
+                <Text style={{
+                    alignItems: 'center', color: 'black', textAlign: 'center',
+                    fontSize: 30, marginTop: 10
+                }}> FUNDING </Text>
 
             </View>
             <View style={styles.headers}>
                 <ScrollView>
-                <Spinner visible={loading} />
+                    <Spinner visible={loading} />
 
-                {fund.map((item, index) => 
-           
-          
-           <View>
-              <View style={{
-                                  backgroundColor: COLORS.green,
-                                  alignItems: 'center', paddingVertical: 20, 
-                                  paddingHorizontal: 20, marginVertical:20,
-                                  marginTop: '20%'
-                              }} >
-                                  <Text style={{ color: 'white', fontSize: 20, fontFamily: 'serif' }}>INVESTED IN:</Text>
-                                  <Text style={{ color: 'white', fontSize: 20, fontFamily: 'san' }}>Granite America Test_</Text>
-                              </View>
-                            
-                              <View style={{
-                              backgroundColor: 'white', borderBottomLeftRadius:5, borderBottomRightRadius: 5,
-                              borderColor:'black', borderWidth: 1
-                          }}>
-                              <View style={{ alignItems: 'center', paddingVertical: 30 }}>
-                                  <Text style={{ fontFamily: 'sans-serif', fontSize: 18 }}>{item.fundingRate}</Text>
-                                  {/* <Text> {item.fundingRate}</Text> */}
-                                 
-  
-                                  <Text style={{ fontFamily: 'serif', fontSize: 13,color:'black' }}>NET ANNUAL YIELD</Text>
-                                  <Text style={{ fontFamily: 'sans-serif', fontSize: 18,color:'black' }}>{item.investorFundedAmount}</Text>
-                          {/* <Text>₹ {item.investorFundedAmount}</Text> */}
-  
-                                  <Text style={{ fontFamily: 'serif', fontSize: 13,color:'black' }}>YOUR INVESTMENT</Text>
-                              </View>
-                              <View style={{ alignItems: 'center', paddingVertical: 13 }}>
-                                  <Text style={{ fontFamily: 'sans-serif', fontSize: 18,color:'black' }}>{item.invoicePaymentDue}</Text>
-                                  {/* <Text>{item.invoicePaymentDue}</Text> */}
-                      
-  
-                                  <Text style={{ fontFamily: 'serif', fontSize: 13,color:'black' }}>EXPECTED REPAYMENT DATE</Text>
-                                  <Text style={{ fontFamily: 'sans-serif', fontSize: 18,color:'black' }}>{item.expectedRepaymentAmount}</Text>
-                                  {/* <Text>{item.expectedRepaymentAmount}</Text> */}
-  
-                                  <Text style={{ fontFamily: 'serif', fontSize: 13,color:'black' }}>EXPECTED REPAYMENT AMOUNT</Text>
-                              </View>
-                              <View style={{ alignItems: 'center' }}>
-                                  <TouchableOpacity    style={{ borderTopWidth: 1, borderBottomWidth:1, borderColor: COLORS.green, width: 320, height: 50, alignItems: 'center' }}
-                                  >
-                                      <Text style={{  position: 'relative', color:COLORS.green, paddingTop: 10, fontFamily: 'serif',fontSize:20 }} >
-                                          Invoice Details
-                                      </Text>
-                                  </TouchableOpacity>
-                              </View>
-                          </View>                          
-                      
-              </View>
-                )} 
+                    {fund?.map((item, index) =>
+
+
+                        <View style={{ marginTop: '10%' }} key={index}>
+                            <Card>
+                                <View style={{
+                                    backgroundColor: COLORS.green,
+                                    alignItems: 'center',
+                                    paddingHorizontal: 20,
+
+                                }} >
+                                    <Text style={{ color: 'white', fontSize: 20, fontFamily: 'serif' }}>INVESTED IN:</Text>
+                                    <Text style={{ color: 'white', fontSize: 20, fontFamily: 'san' }}>Granite America Test_</Text>
+                                </View>
+
+                                <View style={{
+                                    backgroundColor: 'white', borderBottomLeftRadius: 5, borderBottomRightRadius: 5,
+                                    borderColor: 'black', borderWidth: 1
+                                }}>
+                                    <View style={{ alignItems: 'center', paddingVertical: 30 }}>
+                                        <Text style={{ fontFamily: 'sans-serif', fontSize: 18 }}>{item.fundingRate}</Text>
+
+
+                                        <Text style={{ fontFamily: 'serif', fontSize: 13, color: 'black' }}>NET ANNUAL YIELD</Text>
+                                        <Text style={{ fontFamily: 'sans-serif', fontSize: 18, color: 'black' }}>{item.investorFundedAmount}</Text>
+
+                                        <Text style={{ fontFamily: 'serif', fontSize: 13, color: 'black' }}>YOUR INVESTMENT</Text>
+                                    </View>
+                                    <View style={{ alignItems: 'center', paddingVertical: 13 }}>
+                                        <Text style={{ fontFamily: 'sans-serif', fontSize: 18, color: 'black' }}>{item.invoicePaymentDue}</Text>
+
+
+                                        <Text style={{ fontFamily: 'serif', fontSize: 13, color: 'black' }}>EXPECTED REPAYMENT DATE</Text>
+                                        <Text style={{ fontFamily: 'sans-serif', fontSize: 18, color: 'black' }}>{item.expectedRepaymentAmount}</Text>
+
+                                        <Text style={{ fontFamily: 'serif', fontSize: 13, color: 'black' }}>EXPECTED REPAYMENT AMOUNT</Text>
+                                    </View>
+                                    <View style={{ alignItems: 'center' }}>
+                                        <TouchableOpacity style={{ borderTopWidth: 1, borderBottomWidth: 1, borderColor: COLORS.green, width: 320, height: 50, alignItems: 'center' }}
+                                        >
+                                            <Text style={{ position: 'relative', color: COLORS.green, paddingTop: 10, fontFamily: 'serif', fontSize: 20 }} >
+                                                Invoice Details
+                                            </Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                            </Card>
+
+                        </View>
+                    )}
+
+                    <View style={styles.footer}>
+                        <Text style={{ color: 'black', textAlign: 'center', fontWeight: 'bold', paddingTop: 10, fontFamily: 'Georgia' }}>Copyright @ 2021-2022<Text style={{ color: 'blue' }}>UpCap.</Text>All right Reserved.</Text>
+
+                    </View>
                 </ScrollView>
-        
-            
+
+
             </View>
-       
-           
-            <View style={styles.footer}>
-            <Text style={{ color: 'black', textAlign: 'center', fontWeight: 'bold', paddingTop: 30, fontFamily: 'Georgia' }}>Copyright @ 2021-2022<Text style={{ color: 'blue' }}>UpCap.</Text>All right Reserved.</Text>
-         
-            </View>
-            
-       
-      </>
-      
+
+
+
+
+
+        </>
+
     )
 }
 
@@ -164,21 +166,18 @@ const styles = StyleSheet.create({
         backgroundColor: 'white'
     },
     headers: {
-        flex: 11,
+        flex: 9,
         alignItems: 'center',
         paddingLeft: 15,
         backgroundColor: 'white'
     },
     footer: {
-        flex: 1,
         alignItems: 'center',
         backgroundColor: 'white',
-        marginVertical: 10,
-        paddingBottom: 20,
         borderWidth: 1,
         borderColor: 'black',
-        marginTop: 60
-        
+
+
 
     }
 })

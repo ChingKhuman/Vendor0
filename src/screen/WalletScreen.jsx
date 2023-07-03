@@ -1,11 +1,10 @@
 import * as React from 'react'
-import { View, Text, Button, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { BASE_URL } from '../constants/Config';
 import { COLORS, FONTWIEGHT, SIZES } from '../constants/theme';
 import { AuthContext } from '../context/AuthContext';
 import Icon4 from 'react-native-vector-icons/MaterialCommunityIcons'
 import Spinner from "react-native-loading-spinner-overlay/lib";
-import Icon1 from 'react-native-vector-icons/MaterialIcons'
 import { Modal } from 'react-native';
 import { TextInput } from 'react-native';
 import { Pressable } from 'react-native';

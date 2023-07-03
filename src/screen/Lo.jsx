@@ -1,19 +1,12 @@
 import React, { useContext, useState } from "react";
 import {
-  SafeAreaView,
   Text,
   StyleSheet,
-  TextInput,
   View,
-  Button,
   TouchableOpacity,
-  Image,
-  ScrollView,
   StatusBar,
   Dimensions,
 } from 'react-native';
-import Spinner from "react-native-loading-spinner-overlay/lib";
-import { AuthContext } from "../context/AuthContext";
 import * as Animatable from 'react-native-animatable';
 import LinearGradient from "react-native-linear-gradient";
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
@@ -23,10 +16,6 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 
 
 const Lo = ({ navigation }) => {
-
-  const [userEmail, setUserEmail] = useState('');
-  const [userPasswd, setUserPasswd] = useState('');
-  const { loading, login } = useContext(AuthContext)
 
 
 

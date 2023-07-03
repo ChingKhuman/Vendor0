@@ -20,11 +20,10 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 import CustomSidebarMenu from './CustomSidebarMenu';
 import Icon3 from 'react-native-vector-icons/Feather'
 import Icon2 from 'react-native-vector-icons/MaterialCommunityIcons'
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import Lo from '../screen/Lo'
 import WalletStatement from '../screen/NewDesign/WalletStatement';
-import { View } from 'react-native';
-import PaginationView from '../screen/NewDesign/pagination/PaginationView';
+import SearchBar from '../screen/NewDesign/Search/SearchBar';
+import List from '../screen/NewDesign/Search/List';
 
 
 
@@ -32,44 +31,8 @@ import PaginationView from '../screen/NewDesign/pagination/PaginationView';
 
 
 const Stack = createNativeStackNavigator();
-const Tab = createBottomTabNavigator();
 const Drawer = createDrawerNavigator();
 
-// function HomeS() {
-//     return (
-  
-//       <Tab.Navigator
-//       screenOptions={({ route }) => ({
-//         tabBarIcon: ({ focused, color, size }) => {
-//           let iconName;
-
-//           if (route.name === 'Home1') {
-//             iconName = focused
-//             ? 'ios-list' : 'ios-list-outline';
-//           } else if (route.name === 'Invest') {
-//             iconName = focused   ? 'ios-information-circle'
-//             : 'ios-information-circle-outline';
-//           }
-//           else if(route.name === 'Reports') {
-//             iconName = focused ? 'checkmark-done-circle'
-//             : 'checkmark-done-circle-outline'
-//           }
-
-//           // You can return any component that you like here!
-//           return <Ionicons name={iconName} size={size} color={color} />;
-//         },
-//         tabBarActiveTintColor: 'tomato',
-//         tabBarInactiveTintColor: 'gray',
-//       })}
-//      >
-//       <Tab.Screen name="Home1" component={NewHome} options={{headerShown: false, tabBarStyle: "20%"}} />
-//       <Tab.Screen name="Invest" component={NewInvoice} options={{headerShown: false, tabBarStyle: {height: "0%"}, 
-//     tabBarItemStyle: {height:"0%", }}} />
-//       <Tab.Screen name="Reports" component={NewReports} options={{headerShown: false}}/>
-      
-//       </Tab.Navigator>
-//     )
-//   }
 
   function HomeDrawer() {
     return (
@@ -104,9 +67,7 @@ const Drawer = createDrawerNavigator();
               borderWidth: 1,
                   borderColor: 'white',
                   
-                },
-
-               
+                },               
             
             // headerStyle: {
             //   backgroundColor: 'green', //Set Header color
@@ -118,9 +79,7 @@ const Drawer = createDrawerNavigator();
           }}
          
           drawerContent={props => <CustomSidebarMenu {...props}
-          labelStyle={{fontFamily: 'sans-serif', fontsize:40}}
-
-          
+          labelStyle={{fontFamily: 'sans-serif', fontsize:40}}        
        
            />}>
          <Drawer.Screen name="Home" component={NewHome}  options={{
@@ -129,7 +88,7 @@ const Drawer = createDrawerNavigator();
           fontFamily: 'Roboto-Medium'
         },
         drawerIcon: () => (
-          <><Icon3 name="help-circle"
+          <><Icon3 name="home"
             size={20}
             color='black' />
          </>
@@ -141,7 +100,7 @@ const Drawer = createDrawerNavigator();
           fontFamily: 'Roboto-Medium'
         },
         drawerIcon: () => (
-          <><Icon3 name="help-circle"
+          <><Icon3 name="smile"
             size={20}
             color='black' />
          </>
@@ -180,7 +139,7 @@ const Drawer = createDrawerNavigator();
   }
 
 const Navigation = () => {
-    const {userInfo, splashLoading} = useContext(AuthContext)
+    const {userInfo,  splashLoading} = useContext(AuthContext)
     
     return (
        <NavigationContainer>  
@@ -191,9 +150,8 @@ const Navigation = () => {
             options={{headerShown: false}}/>
         ):
 
-    userInfo.data? (              
-        <>             
-        
+     userInfo.code ==200 && userInfo.data.userRole == 3 && userInfo.data?   (              
+        <>          
         
        
         <Stack.Screen name='NewHome' component={HomeDrawer} options={{headerShown: false}}/>
@@ -206,55 +164,20 @@ const Navigation = () => {
                  <Stack.Screen name='Help' component={Help} options={{headerShown: false}}/>   
                  <Stack.Screen name='Profile' component={Profile} options={{headerShown: false}}/>   
                  <Stack.Screen name='WalletStatement' component={WalletStatement} options={{headerShown: true}}/>                 
-                 <Stack.Screen name='PaginationView' component={PaginationView} options={{headerShown: true}}/>                 
+               <Stack.Screen name='SearchBar' component={SearchBar} options={{headerShown: true}}/> 
+               <Stack.Screen name='List' component={List} options={{headerShown: true}}/>                 
                                      
                                          </>  
                  
-        ):(
+    ):(
              <>
                 
                 <Stack.Screen name='GetStarted' component={Lo} options={{headerShown: false}}/>
-                 {/* <Stack.Screen name='Register' component={RegisterScreen}/>    */}
-                 <Stack.Screen name='Login' component={Login} options={{headerShown: false}}/>  
+                                 <Stack.Screen name='Login' component={Login} options={{headerShown: false}}/>  
                  <Stack.Screen name='ForgotPassword' component={ForgotPassword} options= {{headerShown: false}}/>                      
                 </>
            )}
             
-{/*        
-           { userInfo.data && role  === 3 && status === ACTIVE ? 
-                 <>
-                 
-                 <Stack.Screen name='HomeScreen' component={HomeScreen} options={{headerShown: false}}/> 
-                 <Stack.Screen name='Dashboard' component={Dashboard} options={{headerShown: false}}/>                
-                 </>               
-             
-            :
-            (
-                userInfo.data && role === 3 && status ===INACTIVE ? 
-                    <>
-                           <Stack.Screen name='Notification' component={Notification} options={{headerShown: false}}/>  
-                    </>
-                
-            :
-            
-                <>
-                <Stack.Screen name='Login' component={LoginScreen} options={{headerShown: false}}/>
-                 <Stack.Screen name='Register' component={RegisterScreen}/>                           
-                </>
-           )} */}
-            {/* {splashLoading ? (
-                <Stack.Screen name='Splash Screen' component={SplashScreen}
-                options={{headerShown: false}}/>
-            ):
-            userInfo.accessToken ? (
-                <Stack.Screen name='Home' component={HomeScreen} />
-                           ): (
-                               <>
-                               
-                               <Stack.Screen name='Login' component={LoginScreen} options={{headerShown: false}}/>
-                           <Stack.Screen name='Register' component={RegisterScreen}/></>
-                           )} */}
-
 
    </Stack.Navigator>  
    

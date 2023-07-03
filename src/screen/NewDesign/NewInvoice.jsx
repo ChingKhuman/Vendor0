@@ -54,32 +54,6 @@ export default function NewInvoice({navigation}) {
         getData()
     }, [])
 
-    data = [{
-        "discountRate": "70%",
-        "invoiceTenure": "2D",
-        "fundingGoal": "3894787",
-        "unfundedValue": "7868789"
-    },
-    {
-        "discountRate": "80%",
-        "invoiceTenure": "1 D",
-        "fundingGoal": "3894787",
-        "unfundedValue": "7868789"
-    },
-    {
-        "discountRate": "60%",
-        "invoiceTenure": "3D",
-        "fundingGoal": "3894787",
-        "unfundedValue": "7868789"
-    },
-    {
-        "discountRate": "70%",
-        "invoiceTenure": "2D",
-        "fundingGoal": "3894787",
-        "unfundedValue": "7868789"
-    },
-    
-]
 
 
     return (
@@ -87,8 +61,7 @@ export default function NewInvoice({navigation}) {
         <>
 
             <View style={styles.container}>
-                {/* <CustomHeader /> */}
-
+               
             </View>
             <View style={styles.headers}>
             <Text style={{color: 'black', fontSize: 20, borderWidth: 1, borderColor: 'black', 

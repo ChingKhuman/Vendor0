@@ -4,7 +4,8 @@ import moment from "moment";
 import DateRangePicker from 'rnv-date-range-picker';
 import { Pressable } from 'react-native';
 import { AuthContext } from '../../context/AuthContext';
-import { Card } from 'react-native-paper';
+import { Picker } from '@react-native-picker/picker';
+
 
 
 
@@ -15,64 +16,49 @@ export default function WalletStatement() {
   const [modalVisible, setModalVisible] = useState(false);
   const [search, setSearch] = useState()
   const [table, setTable] = useState([])
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortingOption, setSortingOption] = useState('default');
 
-  data = [{
-    "invoiceRefID": "INVOICE1",
-    "counterParty": "FUNDED",
-    "transactionAmount": "40350.00",
-    "transactionDate": "04-04-2023"
-  },
-  {
-    "invoiceRefID": "INVOICE2",
-    "counterParty": "UNFUNDED ",
-    "transactionAmount": "30350.00",
-    "transactionDate": "06-04-2023"
-  },
-  {
-    "invoiceRefID": "INVOICE3",
-    "counterParty": "FUNDED ",
-    "transactionAmount": "50350.00",
-    "transactionDate": "03-04-2023"
-  },
-  {
-    "invoiceRefID": "INVOICE4",
-    "counterParty": "FUNDED",
-    "transactionAmount": "40350.00",
-    "transactionDate": "07-04-2023"
-  },
-  {
-    "invoiceRefID": "INVOICE5",
-    "counterParty": "FUNDED ",
-    "transactionAmount": "40350.00",
-    "transactionDate": "02-04-2023"
-  },
-  {
-    "invoiceRefID": "INVOICE6",
-    "counterParty": "FUNDED ",
-    "transactionAmount": "70350.00",
-    "transactionDate": "08-04-2023"
-  },
-  {
-    "invoiceRefID": "INVOICE6",
-    "counterParty": "FUNDED ",
-    "transactionAmount": "70350.00",
-    "transactionDate": "08-04-2023"
-  },
-  {
-    "invoiceRefID": "INVOICE6",
-    "counterParty": "FUNDED ",
-    "transactionAmount": "70350.00",
-    "transactionDate": "08-04-2023"
-  },
-  {
-    "invoiceRefID": "INVOICE6",
-    "counterParty": "FUNDED ",
-    "transactionAmount": "70350.00",
-    "transactionDate": "08-04-2023"
-  },
+  
 
 
-  ]
+const totalItems = table?.length; // Replace `data` with your actual data array
+const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+const handleNextPage = () => {
+  if (currentPage < totalPages) {
+    setCurrentPage(currentPage + 1);
+  }
+};
+
+const handlePrevPage = () => {
+  if (currentPage > 1) {
+    setCurrentPage(currentPage - 1);
+  }
+};
+
+const startIndex = (currentPage - 1) * itemsPerPage;
+const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+
+const tableData = table?.slice(startIndex, endIndex);
+
+const filteredData = tableData?.filter(item => item.transactionType.includes(searchQuery))
+
+
+ //---------------------Sorting-----------
+ const sortTableData = (option) => {
+
+
+  if (option === 'option1') {
+    table?.sort((a, b) => a.credit - b.credit);
+  } else if (option === 'option2') {
+    table?.sort((a, b) => b.credit - a.credit);
+  }
+  setTable(table);
+};
+ 
 
   const { userInfo } = useContext(AuthContext);
   // // console.log(userInfo)
@@ -109,7 +95,14 @@ export default function WalletStatement() {
   tabData()
  }, [])
 
+ const arr = [];
+ const arrOfObj = table?.forEach(object => {
+  arr.push(object.beneficiaryName)
+  console.log(arrOfObj)
+ })
+
  const source = { uri: 'http://192.168.0.163:9909/upcap/admin/WalletReport.pdf', cache: true };
+
 
   return (
     <>
@@ -176,82 +169,78 @@ export default function WalletStatement() {
 
         <TouchableOpacity style={{backgroundColor: 'green'}}>
         <Text style={{ paddingHorizontal: 10 }}>Download Pdf</Text>
-        {/* <Pdf
-                    source={source}
-                    onLoadComplete={(numberOfPages,filePath) => {
-                        console.log(`Number of pages: ${numberOfPages}`);
-                    }}
-                    onPageChanged={(page,numberOfPages) => {
-                        console.log(`Current page: ${page}`);
-                    }}
-                    onError={(error) => {
-                        console.log(error);
-                    }}
-                    onPressLink={(uri) => {
-                        console.log(`Link pressed: ${uri}`);
-                    }}
-                    style={styles.pdf}/> */}
+        
         </TouchableOpacity>
         <TextInput
-          style={styles.textInputStyle}
-          //   onChangeText={(text) => searchFilterFunction(text)}
-          value={search}
-          underlineColorAndroid="transparent"
-          placeholder="Search Here"
-        />
+        placeholder="Search"
+        value={searchQuery}
+        onChangeText={text => setSearchQuery(text)}
+      />
+
+      <Picker
+        selectedValue={sortingOption}
+        onValueChange={(itemValue) => {
+          setSortingOption(itemValue);
+          sortTableData(itemValue);
+        }}
+      >
+        <Picker.Item label="Default" value="default" />
+        <Picker.Item label="Low to High Amount" value="option1" />
+        <Picker.Item label="High to low Amount" value="option2" />
+        {/* Add more sorting options as needed */}
+      </Picker>
 
         <View>
-          <View style={{
-          flexDirection: 'row', paddingHorizontal: 5, paddingVertical: 15,
-          borderWidth: 1, borderColor: 'black'
-        }}>
-          <Text style={styles.textTable}>Date</Text>
-          <Text style={styles.textTable}>Beneficiary</Text>
-          <Text style={styles.textTable}>Investment</Text>
-          <Text style={styles.textTable}>Balance</Text>
-          <Text style={styles.textTable}>Remark</Text>
-        </View>
-        {table?.map((item, index) =>
+          <View style={{flexDirection: 'row', borderWidth: 1, borderColor: 'grey' }}>
+            <Text style={{fontSize: 15, color: 'black', paddingHorizontal: 10, paddingLeft: 30}}>Date</Text>
+            <Text style={{fontSize: 15, color: 'black', paddingHorizontal: 10, paddingLeft: 30}}>Benificiary</Text>
+            <Text style={{fontSize: 15, color: 'black', paddingHorizontal: 10}}>Invest</Text>
+            <Text style={{fontSize: 15, color: 'black', paddingHorizontal: 10}}>Deposit</Text>
+            <Text style={{fontSize: 15, color: 'black', paddingHorizontal: 10}}>Remarks</Text>
+          </View>
+        
+         {filteredData?.map((item, index) =>
          
            
-              <View style={styles.content} key={index}>
-              <View style={{}}>
-                <Text style={[styles.text, { height: 25, fontSize: 10 }]}>{item.date}</Text>
-              </View>
-              <View style={{ paddingHorizontal: 10 }}>
+         <View style={styles.content} key={index}>
+         <View style={{ height:20, paddingHorizontal: 10}}>
+           <Text style={[styles.text, {  fontSize: 12 }]}>{item.date}</Text>
+         </View>
+         <View style={{ paddingHorizontal: 10 }}>
 
-                <Text style={[styles.text, { height: 25, fontSize: 10 }]}>{item.beneficiaryName}</Text>
-              </View>
-              <View style={{ paddingHorizontal: 25 }}>
-                <Text style={[styles.text, { height: 25, fontSize: 10 }]}>{item.debit}</Text>
-              </View>
-              <View style={{ paddingHorizontal: 20 }}>
-                <Text style={[styles.text, { height: 25, fontSize: 10 }]}>{item.balance}</Text>
-              </View>
+           <Text style={[styles.text, { fontSize: 12 }]}>{item.beneficiaryName}</Text>
+         </View>
+         <View style={{ paddingHorizontal: 10 }}>
+           <Text style={[styles.text, {  fontSize: 12 }]}>{item.debit}</Text>
+         </View>
+         <View style={{ }}>
+           <Text style={[styles.text, {  fontSize: 12 }]}>{item.credit}</Text>
+         </View>
 
-              <View style={{}}>
-                <Text style={[styles.text, { height: 25, fontSize: 10 }]}>{item.remarks}</Text>
-              </View>
+         <View style={{paddingHorizontal: 10, width: '45%', }}>
+           <Text style={[styles.text, {  fontSize: 12 }]}>{item.remarks}</Text>
+         </View>
 
-            </View> 
-                  
-        )}
+       </View> 
+             
+   )} 
+        </View>
+       
          <View style={{ borderTopWidth: 1, borderTopColor: 'grey', paddingVertical: 5, marginVertical: 10 }}>
           <Text style={{ color: 'black', fontSize: 13, paddingLeft: 5 }}>Showing __ to __ entries</Text>
         </View>
         </View>
-       
-      </View>
+        <View style={{flexDirection: 'row', justifyContent: 'flex-end', padding: 10}}>
+      <Button  title='Prev' onPress={handlePrevPage} disabled={currentPage === 1}/>
+      <Text style={{paddingTop: 8, paddingHorizontal: 5, color: 'black'}}>Page {currentPage} of {totalPages}</Text>
+      <Button title='Next' onPress={handleNextPage} disabled={currentPage === totalPages}/>
+    </View>
 
       
       </ScrollView>
-      <View style={styles.footer}>
-
-        
+      <View style={styles.footer}>       
 
         <Text style={{ color: 'black', textAlign: 'center', fontWeight: 'bold', paddingTop: 10, fontFamily: 'Georgia' }}>Copyright @ 2021-2022<Text style={{ color: 'blue' }}>UpCap.</Text>All right Reserved.</Text>
-
-
 
       </View>
     </>
