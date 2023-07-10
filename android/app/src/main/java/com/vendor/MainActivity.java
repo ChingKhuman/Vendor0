@@ -7,7 +7,10 @@ import com.facebook.react.defaults.DefaultReactActivityDelegate;
 import android.os.Bundle;
 
 
+
 public class MainActivity extends ReactActivity {
+
+
 
    @Override
   protected void onCreate(Bundle savedInstanceState) {

@@ -5,6 +5,9 @@ import Spinner from "react-native-loading-spinner-overlay/lib";
 import { AuthContext } from '../../context/AuthContext';
 import { COLORS, SIZES } from '../../constants/theme';
 import { Picker } from '@react-native-picker/picker';
+import RNHTMLtoPDF from 'react-native-html-to-pdf'
+import RNFS from 'react-native-fs'
+import Share from 'react-native-share'
 
 
 
@@ -17,9 +20,10 @@ const NewSettlement = () => {
   const [loading, setLoading] = useState(false)
   const { userInfo } = useContext(AuthContext);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 12;
+  const itemsPerPage = 7;
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortingOption, setSortingOption] = useState('default');
+  const [sortingOption, setSortingOption] = useState('Sort by');
+  const [pdfFilePath, setPdfFilePath] = useState('');
 
 
  
@@ -125,7 +129,70 @@ const NewSettlement = () => {
     setDataSettle(dataSettle);
   };
 
+  const generatePDF = async () => {
+    // Step 2: Generate HTML content
+    const htmlContent = `
+      <html>
+        <body>
+          <table>
+            <thead>
+              <tr>
+                <th>Invoice</th>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${dataSettle
+                .map(
+                  (row) => `
+                  <tr>
+                    <td>${row.uniqueInvoiceID}</td>
+                    <td>${row.transactionType}</td>
+                    <td>${row.transactionAmount}</td>
+                    <td>${row.transactionDate}</td>
+                  </tr>
+                `
+                )
+                .join('')}
+            </tbody>
+          </table>
+        </body>
+      </html>
+    `;
 
+    try {
+      // Step 3: Generate and save PDF file
+      const { filePath } = await RNHTMLtoPDF.convert({
+        html: htmlContent,
+        fileName: 'table_Settlement_data',
+        directory: 'Documents',
+      });
+      setPdfFilePath(filePath);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+    }
+  };
+
+  const downloadPDF = async () => {
+    try {
+      // Step 4: Move PDF file to public directory
+      const destinationPath = `${RNFS.DocumentDirectoryPath}/table_Settlement_data.pdf`;
+      await RNFS.moveFile(pdfFilePath, destinationPath);
+
+      // Step 5: Share or download the PDF file
+      const shareOptions = {
+        title: 'Table Data PDF',
+        url: `file://${destinationPath}`,
+        type: 'application/pdf',
+      };
+      await Share.open(shareOptions);
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+      Alert.alert('Error', 'Failed to download PDF');
+    }
+  };
 
 
 
@@ -140,25 +207,31 @@ const NewSettlement = () => {
 
 
       <TextInput
+      style={{backgroundColor: '#E9F2E9',borderRadius: 10}}
         placeholder="Search"
         value={searchQuery}
         onChangeText={text => setSearchQuery(text)}
       />
+      
+     
 
       <Picker
+      style={{width: 170}}
         selectedValue={sortingOption}
         onValueChange={(itemValue) => {
           setSortingOption(itemValue);
           sortTableData(itemValue);
         }}
       >
+        <Picker.Item label="Sort" value="sort" />
         <Picker.Item label="Default" value="default" />
         <Picker.Item label="Low to High Amount" value="option1" />
         <Picker.Item label="High to low Amount" value="option2" />
         {/* Add more sorting options as needed */}
       </Picker>
-      <View style={{ alignItems: 'center', padding: 10, paddingBottom: 30 }}>
-        <Text style={{ fontSize: SIZES.h2, textAlign: 'center' }}>Settlements</Text>
+     
+      <View style={{ alignItems: 'center', padding: 10, paddingBottom: 30, backgroundColor:'#5B5FB6' }}>
+        <Text style={{ fontSize: SIZES.h2, textAlign: 'center' }}>Settlement</Text>
 
       </View>
       <Spinner visible={loading} />
@@ -198,11 +271,19 @@ const NewSettlement = () => {
             </View>
           </View>
 
+      
+  
+
         </ScrollView>
       )
 
       }
-
+<View>
+<Button title="Generate PDF" onPress={generatePDF} />
+      {pdfFilePath !== '' && (
+        <Button title="Download PDF" onPress={downloadPDF} />
+      )}
+</View>
 
     </>
 

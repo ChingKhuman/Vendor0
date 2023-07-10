@@ -184,6 +184,7 @@ dependencies {
         implementation jscFlavor
     }
     //   compile project(':react-native-pdf-lib')
+     implementation project(':react-native-fs')
 }
 
 task wrapper(type: Wrapper){

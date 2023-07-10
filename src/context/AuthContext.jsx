@@ -68,28 +68,6 @@ export const AuthProvider = ({ children }) => {
 
   myHeaders.append("Content-Type", "application/json");
 
-  var raw = JSON.stringify({
-    "userEmail": "raghu118.pb@gmail.com",
-    "userPasswd": "raghu123",
-    "userFName": "Ching",
-    "referralCode": "987656",
-    "userMobile": "928626233",
-    "userRole": "Investor",
-    "tan": "2133423231",
-    "aadharYesNo": "Yes",
-    "fieldName": "Check",
-    "displayName": "Check",
-    "mandatory": "Yes",
-    "dataType": "CHeck",
-    "example": "Yes"
-  });
-
-  var requestOptions = {
-    method: 'POST',
-    headers: myHeaders,
-    body: raw,
-    redirect: 'follow'
-  };
   //  const register = () => {
   // fetch("http://192.168.0.155:9902/registration/registrationFields", requestOptions)
   //   .then(response => response.text())
@@ -144,6 +122,7 @@ export const AuthProvider = ({ children }) => {
 
       setSplashLoading(false)
     } catch (e) {
+      setSplashLoading(false)
       console.log(`is logged in error ${e}`)
 
     }

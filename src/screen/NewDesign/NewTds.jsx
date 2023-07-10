@@ -9,6 +9,9 @@ import { AuthContext } from '../../context/AuthContext';
 import { Button } from 'react-native';
 import { TextInput } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+import RNHTMLtoPDF from 'react-native-html-to-pdf'
+import RNFS from 'react-native-fs'
+import Share from 'react-native-share'
 
 
 
@@ -20,9 +23,10 @@ const NewTds = () => {
   const [tdsData, setTdsData] = useState([])
   const [loading, setLaoding] = useState(false)
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const itemsPerPage = 4;
   const [searchQuery, setSearchQuery] = useState('');
   const [sortingOption, setSortingOption] = useState('default');
+  const [pdfFilePath, setPdfFilePath] = useState('');
 
 
 
@@ -110,7 +114,7 @@ const NewTds = () => {
   //----------------------Search---------------------
 
 
-  const filteredData = tdsData?.filter(item => item.counterParty.includes(searchQuery)) 
+
 
 
 
@@ -136,6 +140,8 @@ const NewTds = () => {
 const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
 
 const tableData = tdsData?.slice(startIndex, endIndex);
+
+const filteredData = tableData?.filter(item => item.counterParty.includes(searchQuery)) 
 
   data = [{
     "invoiceRefID": "INVOICE1",
@@ -195,6 +201,73 @@ const tableData = tdsData?.slice(startIndex, endIndex);
 
   ]
 
+  //------------------------For PDF
+
+  const generatePDF = async () => {
+    // Step 2: Generate HTML content
+    const htmlContent = `
+      <html>
+        <body>
+          <table>
+            <thead>
+              <tr>
+                <th>REFID</th>
+                <th>COUNTER PARTY</th>
+                <th>TRANS AMT</th>
+                <th>TRANS DATE</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${tdsData
+                .map(
+                  (row) => `
+                  <tr>
+                    <td>${row.invoiceRefID}</td>
+                    <td>${row.counterParty}</td>
+                    <td>${row.transactionAmount}</td>
+                    <td>${row.transactionDate}</td>
+                  </tr>
+                `
+                )
+                .join('')}
+            </tbody>
+          </table>
+        </body>
+      </html>
+    `;
+
+    try {
+      // Step 3: Generate and save PDF file
+      const { filePath } = await RNHTMLtoPDF.convert({
+        html: htmlContent,
+        fileName: 'table_Tds_data',
+        directory: 'Documents',
+      });
+      setPdfFilePath(filePath);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+    }
+  };
+
+  const downloadPDF = async () => {
+    try {
+      // Step 4: Move PDF file to public directory
+      const destinationPath = `${RNFS.DocumentDirectoryPath}/table_Tds_data.pdf`;
+      await RNFS.moveFile(pdfFilePath, destinationPath);
+
+      // Step 5: Share or download the PDF file
+      const shareOptions = {
+        title: 'Table Data PDF',
+        url: `file://${destinationPath}`,
+        type: 'application/pdf',
+      };
+      await Share.open(shareOptions);
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+      Alert.alert('Error', 'Failed to download PDF');
+    }
+  };
+
   return (
 
     <>
@@ -219,6 +292,7 @@ const tableData = tdsData?.slice(startIndex, endIndex);
       </Picker>
       <View style={styles.container}>
         <Text style={{ fontSize: SIZES.h1, padding: 7, textAlign: 'center', color: 'black' }}> TDS Transactions</Text>
+ 
       </View>
 
       <View style={styles.header}>   
@@ -275,10 +349,12 @@ const tableData = tdsData?.slice(startIndex, endIndex);
       </View>
       <Spinner visible={loading} />
 
-
       <View>
-
-      </View>
+<Button title="Generate PDF" onPress={generatePDF} />
+      {pdfFilePath !== '' && (
+        <Button title="Download PDF" onPress={downloadPDF} />
+      )}
+</View>
       <View style={styles.footer} >
         <Text style={{ color: 'black', textAlign: 'center', fontWeight: 'bold', paddingTop: 10, fontFamily: 'Georgia' }}>Copyright @ 2021-2022<Text style={{ color: 'blue' }}>UpCap.</Text>All right Reserved.</Text>
 
@@ -291,7 +367,8 @@ const tableData = tdsData?.slice(startIndex, endIndex);
 const styles = StyleSheet.create({
   container: {
     flex: 0.0,
-    backgroundColor: 'white'
+    backgroundColor: 'white',
+    flexDirection: 'row'
   },
   header: {
     flex: 1.8,

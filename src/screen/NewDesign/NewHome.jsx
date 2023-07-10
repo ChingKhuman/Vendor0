@@ -23,12 +23,9 @@ const NewHome = ({ navigation }) => {
     const windowWidth = Dimensions.get('window').width;
     const [pieData, setpieData] = useState([]);
     const [pieAData, setpieAData] = useState([])
-
-
-
-
     const { userInfo } = useContext(AuthContext);
     const token = userInfo.data?.accessToken;
+    console.log(token)
 
 
     var myHeaders = new Headers();
@@ -43,9 +40,6 @@ const NewHome = ({ navigation }) => {
         redirect: 'follow'
     };
 
-
-
-
     const getData = () => {
         setLaoding(true)
         fetch(`${BASE_URL}/dashboard/dashboardsummary`, requestOptions)
@@ -55,6 +49,7 @@ const NewHome = ({ navigation }) => {
             then(function (myJson) {
                 let cont = myJson?.data.count;
                 setPieCount(cont);
+
                 let Color = ['green', 'blue', 'violet', '#92CDE2']
                 let colorData = cont.map((row, index) => {
                     return {
@@ -65,6 +60,7 @@ const NewHome = ({ navigation }) => {
                 });
                 setLaoding(false)
                 setpieData(colorData)
+                 console.log('checking.....',colorData)
             }).catch(function (error) {
                 console.log(error)
                 setLaoding(false)
@@ -101,8 +97,7 @@ const NewHome = ({ navigation }) => {
             }).catch(function (error) {
                 console.log(error)
             })
-
-    }
+            }
     useEffect(() => {
         getData1()
     }, []);
@@ -110,6 +105,10 @@ const NewHome = ({ navigation }) => {
     const sortAmount = pieAmount.sort(function (a, b) {
         return a.totalOfferedAmount - b.totalOfferedAmount
     })
+
+        const victoryAmount = pieAmount.map(a => a.name)
+         console.log(victoryAmount)
+ 
 
     const getDataYield = () => {
         fetch(`${BASE_URL}/dashboard/dashboardsummary`, requestOptions)
@@ -141,6 +140,26 @@ const NewHome = ({ navigation }) => {
         item.allOfferCount
     )
 
+    
+
+    
+        // Set different color styles based on x value
+        let getColorBasedOnX = pieCount.map(i => 
+           {
+            if (i.name === 'Settled') {
+                return 'green';
+              } else if (i.name === 'Offered') {
+                return 'blue';
+              } else if (i.name === 'Accepted') {
+                return '#92CDE2';
+              } else {
+                return 'violet';
+            }
+           }
+            )
+        // Default color for other values
+      
+      
     const sliceColor = ['green', 'blue', 'violet', '#92CDE2']
 
 
@@ -181,9 +200,9 @@ const NewHome = ({ navigation }) => {
     ]
 
     const radioProps = [
-        { label: 'BarA', value: 3 },
-        { label: 'PieA', value: 4 },
-        { label: 'Area', value: 5 }
+        { label: 'BarA', value: 0 },
+        { label: 'PieA', value: 1 },
+        { label: 'Area', value: 2 }
     ]
 
     const animation = useRef(new Animated.Value(0)).current;
@@ -246,50 +265,49 @@ const NewHome = ({ navigation }) => {
             }
         ]
     };
+
+   
+
     return (
 
         <>
-            <View style={{ flex: 0.0 }}>
-
-            </View>
-
-            <View style={{ flex: 3 }}>
-                <ScrollView
+           
+           <ScrollView
                     // contentContainerStyle={styles.scrollView}
                     refreshControl={
                         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
+            {/* <View > */}
+               
                     <View style={styles.container}>
                         <View style={{
-                            backgroundColor: 'white', marginVertical: 29, borderRadius: 5,
+                            backgroundColor: 'white', marginVertical: 30, borderRadius: 5,
                             marginHorizontal: 10
-
                         }}>
 
                             <View style={{
-                                paddingHorizontal: 10, marginVertical: 20,
+                                paddingHorizontal: 10, marginTop: 20,
                                 justifyContent: 'space-between',
                             }}>
                                 <Text style={styles.Text5}> YIELDS </Text>
                                 <Text style={{
                                     color: '#27666A', fontSize: 15,
-                                    marginBottom: 1, fontFamily: 'sans-serif'
+                                    marginBottom: 1, fontFamily: 'sans-serif',
                                 }}> Total Yield</Text>
 
-                                <Text style={{ fontSize: 13, color: '#27666A', paddingLeft: 7 }}>Rs. {yieVal.totalYield}</Text>
+                                <Text style={{ fontSize: 13, color: '#27666A', paddingLeft: 7, paddingBottom: 10 ,
+                            borderBottomWidth:1, borderColor:'grey',}}>Rs. {yieVal.totalYield}</Text>
 
                             </View>
 
-                            <View style={{
-                                borderTopWidth: 1, borderTopColor: 'grey',
-                                height: 40, paddingTop: 10
-                            }}>
-                                <Text style={{ color: 'blue', fontFamily: 'sans-serif', textAlign: 'center' }}>  View all</Text>
-                            </View>
+                           
+                                <Text style={{height: 25,marginVertical:10, color: 'blue', fontFamily: 'sans-serif', textAlign: 'center' }}>  Note: The ....</Text>
+                           
                         </View>
-                    </View>
+                          </View>
+                    {/* </View> */}
 
                     <View style={styles.headers}>
-                        <View style={{ marginVertical: 15 }}>
+                       
                             <Card style={{ width: 370 }} >
 
                                 <View style={{ alignItems: 'center' }}>
@@ -319,16 +337,32 @@ const NewHome = ({ navigation }) => {
                                         }}
                                     >
                                         <VictoryBar
-                                            style={{
-                                                data: {
-                                                    fill: "orange",
-                                                    width: 10,
-                                                }
-                                            }}
-                                            colorScale={sliceColor}
-                                            data={pieCount}
+                                          style={{
+                                            data: {
+                                                fill: ({ datum}) => 
+                                                datum.name ==='Settled' ? 'green':
+                                                datum.name === 'Offered' ? 'blue':                                               
+                                                datum.name === 'Accepted'  ? '#92CDE2'
+                                                : 'violet',
+                                                
+                                                fillOpacity: 0.7,
+                                                strokeWidth: 3
+                                            },
+                                            labels: {
+                                                fontSize: 15,
+                                                fill: ({datum}) => datum.x ===  'Settled' ? 'red': 
+                                                datum.x === 'Accepted'  ? 'green':
+                                                datum.x === 'Offered' ? 'violet'
+                                                : 'blue'
+                                            }
+                                          }}
+                                          labels = {({ datum }) => datum.x}
+                                            
+                                            data={pieData}
                                             x='name'
                                             y='allOfferCount'
+                                            
+                                            
 
                                             barRatio={0.8}
                                             animate={{
@@ -337,9 +371,7 @@ const NewHome = ({ navigation }) => {
 
                                                 }
                                             }}
-                                            labelComponent={
-                                                <VictoryLabel angle={90} verticalAnchor="middle" textAnchor="end" />
-                                            }
+                                          
                                         />
                                     </VictoryChart>
                                     : null
@@ -350,10 +382,9 @@ const NewHome = ({ navigation }) => {
                                             width={300} // Adjust the width of the pie chart
                                             height={300}
                                             innerRadius={0} // Adjust the inner radius to make the pie smaller
-                                            labelRadius={80} // Adjust the distance of the labels from the center of the pie
+                                             labelRadius={80} // Adjust the distance of the labels from the center of the pie
                                             padding={50}
                                             colorScale={sliceColor}
-
                                             data={pieCount}
                                             x='name'
                                             y='allOfferCount'
@@ -362,7 +393,7 @@ const NewHome = ({ navigation }) => {
                                     : null
                                 }
                                 {chart === 2
-                                    ? <VictoryArea data={pieCount} x='name'
+                                    ? <VictoryLine data={pieCount} x='name'
                                         y='allOfferCount'
                                         colorScale={sliceColor}
                                     />
@@ -372,9 +403,7 @@ const NewHome = ({ navigation }) => {
 
 
                                 <View style={{
-
-                                    width: windowWidth, paddingRight: 30,
-                                }}>
+                                    width: windowWidth, paddingRight: 30,}}>
                                     {pieData.map((item, index) => (
                                         <>
                                             <View style={styles.View8} key={index.id}>
@@ -392,8 +421,8 @@ const NewHome = ({ navigation }) => {
                                 </View>
 
                             </Card>
-                        </View>
-
+                       
+                            </View>
                         <View style={{ marginVertical: 20 }}>
 
                             <Card style={{ width: 370 }}>
@@ -414,13 +443,14 @@ const NewHome = ({ navigation }) => {
                                 </View>
 
                                 <View style={styles.View10}>
-                                    {chartA === 3
+                                    {chartA === 0
                                         ?
                                         <VictoryChart
                                             height={250}
                                             width={350}
                                             theme={VictoryTheme.material}
-                                            domainPadding={{ x: 20 }}
+                                         domainPadding={{ x: 20 }}
+                                             
                                             animate={{
                                                 onLoad: { duration: 500 },
                                                 duration: 500,
@@ -428,15 +458,45 @@ const NewHome = ({ navigation }) => {
                                             }}
                                         >
                                             <VictoryBar
-                                                data={pieAmount}
+                                                data={pieAData}
                                                 x='name'
                                                 y='totalOfferedAmount'
-                                                colorScale={sliceColor1}
+                                                style={{
+                                                    data: {
+                                                        fill: ({ datum}) => 
+                                                        datum.name ==='Settled' ? 'red':
+                                                        datum.name === 'Offered' ? 'blue':                                               
+                                                        datum.name === 'Accepted'  ? '#92CDE2'
+                                                        : 'green',
+                                                        
+                                                        fillOpacity: 0.7,
+                                                        strokeWidth: 3
+                                                    },
+                                                    labels: {
+                                                        fontSize: 15,
+                                                        fill: ({datum}) => datum.x ===  'Settled' ? 'red': 
+                                                        datum.x === 'Accepted'  ? 'green':
+                                                        datum.x === 'Offered' ? 'violet'
+                                                        : 'blue'
+                                                    }
+                                                  }}
+                                                  labels = {({ datum }) => datum.x}
                                             />
+                                            <VictoryAxis/>
+                                            {victoryAmount.map((d, i ) => {
+                                                return (
+                                                    <VictoryAxis dependentAxis
+                                                    key={i}
+                                                    label={d}
+                                                    style={{tickLabels: {fill: 'none'}}}
+                                                    axisValue= {d}
+                                                    />
+                                                )
+                                            })}
                                         </VictoryChart>
                                         : null
                                     }
-                                    {chartA === 4
+                                    {chartA === 1
                                         ? <VictoryPie
                                             width={300} // Adjust the width of the pie chart
                                             height={300}
@@ -448,53 +508,53 @@ const NewHome = ({ navigation }) => {
                                             y='totalOfferedAmount' />
                                         : null
                                     }
-                                    {chartA === 5
-                                        ? <VictoryArea colorScale={sliceColor1}
-                                            data={pieAmount} x='name'
-                                            y='totalOfferedAmount'
-                                        />
+                                    {chartA === 2
+                                        ? <VictoryChart>
+                                            <VictoryLine
+                                            data={pieAmount}/>
+                                        </VictoryChart>
                                         : null
                                     }
 
                                 </View>
-                            </Card>
-                            {pieAData.map((item, index1) =>
-                                <View style={styles.View8} key={index1.id}>
-                                    <Text style={{ flexDirection: 'column', color: item.color, fontSize: 15 }}>{item.name}:</Text>
-                                    <View style={{ alignItems: 'flex-end', }} key={index1}>
-                                        <Text style={styles.Text7}>{item.totalOfferedAmount}</Text>
-                                    </View>
-                                    <View >
-                                    </View>
-                                </View>
-                            )}
 
+                                {pieAData.map((item, index1) =>
+                                    <View style={styles.View8} key={index1.id}>
+                                        <Text style={{ flexDirection: 'column', color: item.color, fontSize: 15 }}>{item.name}:</Text>
+                                        <View style={{ alignItems: 'flex-end', }} key={index1}>
+                                            <Text style={styles.Text7}>{item.totalOfferedAmount}</Text>
+                                        </View>
+                                        <View >
+                                        </View>
+                                    </View>
+                                )}
+                            </Card>
                         </View>
-                    </View>
+                  
 
                     <View style={styles.footer} >
 
                         <Text style={{
                             color: 'black', textAlign: 'center', fontWeight: 'bold',
                             fontFamily: 'Georgia',
-                            backgroundColor: COLORS.green,
+                            backgroundColor: "white",
                             paddingHorizontal: 35,
-                            paddingVertical: 5
+                            paddingVertical: 8
 
                         }}>Copyright @ 2021-2022<Text style={{ color: 'blue' }}>UpCap.</Text>All right Reserved.</Text>
 
                     </View>
-                </ScrollView>
-            </View>
+               
+             </ScrollView>
 
-            <View style={styles.footer1}>
+                  <View style={styles.footer1}>
                 <View style={{ flex: 0.9 }}>
                     <Animated.View style={{ opacity: fadeAnim }}>
                         <TouchableOpacity style={{
                             backgroundColor: 'powderblue',
-                            borderBottomRightRadius: 30, borderTopRightRadius: 30
+                            borderBottomRightRadius: 30, borderTopRightRadius: 30,padding: 10,
                         }} onPress={() => navigation.navigate('NewInvoice')}>
-                            <Text style={{ textAlign: 'center', paddingVertical: 18, color: 'black', fontSize: 20 }}>Invest</Text>
+                            <Text style={{ textAlign: 'center',  color: 'black', fontSize: 20 }}>Invest</Text>
                         </TouchableOpacity>
                     </Animated.View>
                 </View>
@@ -510,15 +570,15 @@ const NewHome = ({ navigation }) => {
                     <Animated.View style={{ opacity: fadeAnim }}>
                         <TouchableOpacity style={{
                             backgroundColor: 'powderblue',
-                            borderBottomLeftRadius: 30, borderTopLeftRadius: 30
+                            borderBottomLeftRadius: 30, borderTopLeftRadius: 30,padding: 10,
                         }} onPress={() => navigation.navigate('NewReport')}>
-                            <Text style={{ textAlign: 'center', paddingVertical: 18, color: 'black', fontSize: 20 }}> Report</Text>
+                            <Text style={{ textAlign: 'center', color: 'black', fontSize: 20 }}> Report</Text>
 
                         </TouchableOpacity>
                     </Animated.View>
                 </View>
 
-            </View>
+               </View>
 
 
         </>
@@ -528,7 +588,8 @@ const NewHome = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 0.0,
-        backgroundColor: '#5B5FB6',
+         backgroundColor: '#5B5FB6',
+        // backgroundColor: '#05375a',
         marginTop: 0,
         borderTopColor: 'white',
         borderTopWidth: 1
@@ -536,17 +597,19 @@ const styles = StyleSheet.create({
     headers: {
         flex: 0.8,
         alignItems: 'center',
-        backgroundColor: '#C5C9C9',
-        borderColor: 'black',
-        borderWidth: 1
+        // backgroundColor: '#C5C9C9',
+        marginVertical: 15,
+        // borderColor: 'black',
+        // borderWidth: 1
     },
     footer: {
         alignItems: 'center',
         marginVertical: 5,
     },
     footer1: {
-        flex: -1,
+        flex: 0,
         flexDirection: 'row',
+        
     },
 
 

@@ -31,14 +31,18 @@ const CustomTab = () => (
    
   <Tab.Navigator screenOptions={screenOptions}
     tabBarOptions={{
-      activeTintColor: '#fff',
-      inactiveTintColor: 'lightgray',
-      activeBackgroundColor: 'red',
-      inactiveBackgroundColor: 'grey',
-          style: {
-                backgroundColor: '#CE4418',
-                paddingBottom: 3
-          }
+     tabBarActiveTintColor: '#fff',
+      tabBarInactiveTintColor: 'lightgray',
+      tabBarActiveBackgroundColor: 'red',
+      tabBarInactiveBackgroundColor: 'grey',
+          tabBarStyle: [
+            {
+              display: 'flex',
+                  backgroundColor: '#CE4418',
+                  paddingBottom: 3
+            },
+            null
+          ]
    }}>
     
          <Tab.Screen name="Funding" component={NewFunding} options={{ headerShown: false, tabBarStyle: "20%" }} />

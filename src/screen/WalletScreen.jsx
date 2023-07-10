@@ -57,8 +57,7 @@ const WalletScreen = ({ navigation }) => {
 
     // const getWithdraw = () => {
     //     setLoading(true)
-    //     fetch(`${BASE_URL}/wallet/withdrawal`, requestOptions)
-    // }
+    //     fetch(`${BASE_URL}/wallet/withdrawal`, requestOptions) }
 
 
 
@@ -94,7 +93,7 @@ const WalletScreen = ({ navigation }) => {
                                 WALLET NET BALANCE
                             </Text>
                             <TouchableOpacity style={styles.touchable1}
-                               onPress={'NewHome'}>
+                              onPress={() => navigation.navigate('NewHome')}>
                                 <Text style={styles.Text4} >
                                     My Investment
                                 </Text>

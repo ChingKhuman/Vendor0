@@ -24,6 +24,9 @@ import Lo from '../screen/Lo'
 import WalletStatement from '../screen/NewDesign/WalletStatement';
 import SearchBar from '../screen/NewDesign/Search/SearchBar';
 import List from '../screen/NewDesign/Search/List';
+import InvoiceDetails from '../screen/NewDesign/Details/InvoiceDetails';
+import CheckEmail from '../screen/ForgotPassword/CheckEmail';
+
 
 
 
@@ -34,155 +37,160 @@ const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
 
 
-  function HomeDrawer() {
-    return (
-        <Drawer.Navigator
-      
-        screenOptions={{
-            headerShown:'true',
-            drawerActiveBackgroundColor: 'blue',
-            drawerActiveTintColor:"#8DD2EA",
-            drawerInactiveTintColor:"black",
-            inactiveBackgroundColor: 'transparent',
-            activeTintColor: 'red',
-            labelStyle: {
-              fontSize: 30,
-              marginLeft: 10,
-            },
-            headerStyle: {
-                backgroundColor: '#5B5FB6',
-                elevation: 0,
-                shadowOpacity: 0,
-                height: 60
-            },
-            headerTitle: 'Menu',
-            
-            drawerStyle: {
-              // backgroundColor: '#667EB8',
-              borderWidth: 1,
-            borderColor: 'white'
-              
-            },
-            itemStyle: {marginVertical: 5,
-              borderWidth: 1,
-                  borderColor: 'white',
-                  
-                },               
-            
-            // headerStyle: {
-            //   backgroundColor: 'green', //Set Header color
-            // },
-            // headerTintColor: 'white', //Set Header text color
-            // headerTitleStyle: {
-            //   fontWeight: 'bold', //Set Header text style
-            // },
-          }}
-         
-          drawerContent={props => <CustomSidebarMenu {...props}
-          labelStyle={{fontFamily: 'sans-serif', fontsize:40}}        
-       
-           />}>
-         <Drawer.Screen name="Home" component={NewHome}  options={{
-        drawerLabelStyle:{
-          fontSize:17,
+function HomeDrawer() {
+  return (
+    <Drawer.Navigator
+
+      screenOptions={{
+        headerShown: 'true',
+        drawerActiveBackgroundColor: '#5B5FB6',
+        drawerActiveTintColor: "#8DD2EA",
+        drawerInactiveTintColor: "black",
+        inactiveBackgroundColor: 'transparent',
+        activeTintColor: 'red',
+        labelStyle: {
+          fontSize: 30,
+          marginLeft: 10,
+        },
+        headerStyle: {
+          backgroundColor: '#5B5FB6',
+          elevation: 0,
+          shadowOpacity: 0,
+          height: 60
+        },
+        headerTitle: 'Menu',
+
+        drawerStyle: {
+          // backgroundColor: '#667EB8',
+          borderWidth: 1,
+          borderColor: 'white'
+
+        },
+        itemStyle: {
+          marginVertical: 5,
+          borderWidth: 1,
+          borderColor: 'white',
+
+        },
+
+        // headerStyle: {
+        //   backgroundColor: 'green', //Set Header color
+        // },
+        // headerTintColor: 'white', //Set Header text color
+        // headerTitleStyle: {
+        //   fontWeight: 'bold', //Set Header text style
+        // },
+      }}
+
+      drawerContent={props => <CustomSidebarMenu {...props}
+        labelStyle={{ fontFamily: 'sans-serif', fontsize: 40 }}
+
+      />}>
+      <Drawer.Screen name="Home" component={NewHome} options={{
+        drawerLabelStyle: {
+          fontSize: 17,
           fontFamily: 'Roboto-Medium'
         },
         drawerIcon: () => (
           <><Icon3 name="home"
             size={20}
             color='black' />
-         </>
+          </>
         )
       }} />
-        <Drawer.Screen name="Profile" component={Profile}  options={{
-        drawerLabelStyle:{
-          fontSize:17,
+      <Drawer.Screen name="Profile" component={Profile} options={{
+        drawerLabelStyle: {
+          fontSize: 17,
           fontFamily: 'Roboto-Medium'
         },
         drawerIcon: () => (
           <><Icon3 name="smile"
             size={20}
             color='black' />
-         </>
+          </>
         )
       }} />
-        <Drawer.Screen name="Help" component={Help} 
-      options={{
-        drawerLabelStyle:{
-          fontSize:17,
-          fontFamily: 'Roboto-Medium'
-        },
-        drawerIcon: () => (
-          <><Icon3 name="help-circle"
-            size={20}
-            color='black' />
-         </>
-        )
-      }}
-      
+      <Drawer.Screen name="Help" component={Help}
+        options={{
+          drawerLabelStyle: {
+            fontSize: 17,
+            fontFamily: 'Roboto-Medium'
+          },
+          drawerIcon: () => (
+            <><Icon3 name="help-circle"
+              size={20}
+              color='black' />
+            </>
+          )
+        }}
+
       />
-       <Drawer.Screen name="Wallet Management" component={WalletScreen}  
-    options={{
-      drawerLabelStyle:{
-        fontSize:17,
-        fontFamily: 'Roboto-Medium'
-      },
-      drawerIcon: () => (
-        <Icon2 name="wallet" 
-        size={20}
-        color="black"
-         />
-      )
-    }}/>
-        </Drawer.Navigator>
-    )
-  }
+      <Drawer.Screen name="Wallet Management" component={WalletScreen}
+        options={{
+          drawerLabelStyle: {
+            fontSize: 17,
+            fontFamily: 'Roboto-Medium'
+          },
+          drawerIcon: () => (
+            <Icon2 name="wallet"
+              size={20}
+              color="black"
+            />
+          )
+        }} />
+    </Drawer.Navigator>
+  )
+}
 
 const Navigation = () => {
-    const {userInfo,  splashLoading} = useContext(AuthContext)
-    
-    return (
-       <NavigationContainer>  
-        <Stack.Navigator>         
+  const { userInfo, splashLoading } = useContext(AuthContext)
+
+  return (
+    <NavigationContainer>
+      <Stack.Navigator>
         {
-        splashLoading ? (
+          splashLoading ? (
             <Stack.Screen name='Splash Screen' component={SplashScreen}
-            options={{headerShown: false}}/>
-        ):
+              options={{ headerShown: false }} />
+          ) :
 
-     userInfo.code ==200 && userInfo.data.userRole == 3 && userInfo.data?   (              
-        <>          
-        
-       
-        <Stack.Screen name='NewHome' component={HomeDrawer} options={{headerShown: false}}/>
-        <Stack.Screen name='Funding' component={NewFunding} options={{headerShown: true}}/> 
-           <Stack.Screen name='NewReport' component={NewReports} options={{headerShown: true}}/>  
-                  <Stack.Screen name='NewInvoice' component={NewInvoice} options={{headerShown: true}}/>    
-                  <Stack.Screen name='NewSettlement' component={NewSettlement} options={{headerShown: true}}/>  
-                  <Stack.Screen name='NewTds' component={NewTds} options={{headerShown: true}}/>               
-             <Stack.Screen name='Wallet' component={WalletScreen} options={{headerShown: false}}/>    
-                 <Stack.Screen name='Help' component={Help} options={{headerShown: false}}/>   
-                 <Stack.Screen name='Profile' component={Profile} options={{headerShown: false}}/>   
-                 <Stack.Screen name='WalletStatement' component={WalletStatement} options={{headerShown: true}}/>                 
-               <Stack.Screen name='SearchBar' component={SearchBar} options={{headerShown: true}}/> 
-               <Stack.Screen name='List' component={List} options={{headerShown: true}}/>                 
-                                     
-                                         </>  
-                 
-    ):(
-             <>
-                
-                <Stack.Screen name='GetStarted' component={Lo} options={{headerShown: false}}/>
-                                 <Stack.Screen name='Login' component={Login} options={{headerShown: false}}/>  
-                 <Stack.Screen name='ForgotPassword' component={ForgotPassword} options= {{headerShown: false}}/>                      
-                </>
-           )}
-            
+             userInfo.code == 200 && userInfo.data.userRole == 3 && userInfo.data ? (
+              // userInfo? (
+              <>
 
-   </Stack.Navigator>  
-   
-        </NavigationContainer>
-    )}
+
+                <Stack.Screen name='NewHome' component={HomeDrawer} options={{ headerShown: false }} />
+                <Stack.Screen name='Funding' component={NewFunding} options={{ headerShown: true }} />
+                <Stack.Screen name='NewReport' component={NewReports} options={{ headerShown: true,headerTitle: 'Report' }} />
+                <Stack.Screen name='NewInvoice' component={NewInvoice} options={{ headerShown: false }} />
+                <Stack.Screen name='NewSettlement' component={NewSettlement} options={{ headerShown: true }} />
+                <Stack.Screen name='NewTds' component={NewTds} options={{ headerShown: true }} />
+                <Stack.Screen name='Wallet' component={WalletScreen} options={{ headerShown: false }} />
+                <Stack.Screen name='Help' component={Help} options={{ headerShown: false }} />
+                <Stack.Screen name='Profile' component={Profile} options={{ headerShown: false }} />
+                <Stack.Screen name='WalletStatement' component={WalletStatement} options={{ headerShown: true }} />
+                <Stack.Screen name='InvoiceDetails' component={InvoiceDetails} options={{headerTitle: '', headerTransparent: true}} />                
+                <Stack.Screen name='ForgotPassword' component={ForgotPassword} options={{headerTitle: '', headerTransparent: true}} />
+               
+
+              </>
+
+            ) : (
+              <>
+
+                <Stack.Screen name='GetStarted' component={Lo} options={{ headerShown: false }} />
+                <Stack.Screen name='Login' component={Login} options={{ headerShown: false }} />
+                <Stack.Screen name='ForgotPassword' component={ForgotPassword} options={{ headerShown: false }} />
+                <Stack.Screen name='CheckEmail' component={CheckEmail} options={{headerShown:false}} />
+              </>
+            )}
+
+
+      </Stack.Navigator>
+
+    </NavigationContainer>
+  )
+}
 
 
 export default Navigation;

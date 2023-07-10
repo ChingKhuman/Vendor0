@@ -1,10 +1,15 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Button } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Button, FlatList, Image, TouchableHighlight } from 'react-native';
 import Spinner from "react-native-loading-spinner-overlay/lib";
 import { AuthContext } from '../../context/AuthContext';
 import { BASE_URL } from '../../constants/Config';
 import { COLORS } from '../../constants/theme';
 import { Card } from 'react-native-paper';
+import { StatusBar } from 'react-native';
+import { Animated } from 'react-native';
+import { useRef } from 'react';
+import { ActivityIndicator } from 'react-native';
+;
 
 
 
@@ -13,7 +18,10 @@ const NewFunding = () => {
 
     const [fund, setFund] = useState([]);
     const { userInfo } = useContext(AuthContext);
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(false);
+    const [pageCurrent, setPageCurrent] = useState(1)
+    
+
     // console.log(userInfo)
     const token = userInfo.data?.accessToken;
     var myHeaders = new Headers();
@@ -30,13 +38,13 @@ const NewFunding = () => {
 
     const getData = () => {
         setLoading(true)
-        fetch(`${BASE_URL}/invoicediscounting/listfundings`, requestOptions)
+        fetch(`${BASE_URL}/invoicediscounting/listfundings?_limit=2&_page=` + pageCurrent, requestOptions)
             .then(function (response) {
                 return response.json();
             }).
             then(function (myJson) {
                 let cont = myJson.data;
-                //  console.log('fund check....', cont);
+                //   console.log('fund check....', cont);
                 setFund(cont)
                 setLoading(false)
             }).catch(function (error) {
@@ -47,39 +55,162 @@ const NewFunding = () => {
     }
     useEffect(() => {
         getData()
-    }, [])
+        setLoading(true)
+        return () => {
 
-    data = [{
-        "fundingRate": "13%",
-        "investorFundedAmount": "100000",
-        "invoicePaymentDue": "24-4-2023",
-        "expectedRepaymentAmount": "Rs 1,03,136.78"
-    },
-    {
-        "fundingRate": "17%",
-        "investorFundedAmount": "200000",
-        "invoicePaymentDue": "24-4-2023",
-        "expectedRepaymentAmount": "Rs 1,03,136.78"
-    },
-    {
-        "fundingRate": "13%",
-        "investorFundedAmount": "300,000",
-        "invoicePaymentDue": "24-4-2023",
-        "expectedRepaymentAmount": "Rs 1,03,136.78"
-    },
-    {
-        "fundingRate": "13%",
-        "investorFundedAmount": "4,0889878",
-        "invoicePaymentDue": "24-4-2023",
-        "expectedRepaymentAmount": "Rs 1,03,136.78"
-    },
+        }
+    }, [pageCurrent])
 
-    ]
+    const renderFooter = () => {
+        return (
+            loading ? 
+            <View style={{marginTop:10, alignItems: 'center'}}>
+                <ActivityIndicator size='large'/>
+            </View>: null
+                
+        )
+    }
 
+    const handleLoadMore = () => {
+        setPageCurrent(pageCurrent +1)
+        setLoading(true)
+    }
+    // data = [{
+    //     "fundingRate": "13%",
+    //     "investorFundedAmount": "100000",
+    //     "invoicePaymentDue": "24-4-2023",
+    //     "expectedRepaymentAmount": "Rs 1,03,136.78"
+    // },
+    // {
+    //     "fundingRate": "17%",
+    //     "investorFundedAmount": "200000",
+    //     "invoicePaymentDue": "24-4-2023",
+    //     "expectedRepaymentAmount": "Rs 1,03,136.78"
+    // },
+    // {
+    //     "fundingRate": "13%",
+    //     "investorFundedAmount": "300,000",
+    //     "invoicePaymentDue": "24-4-2023",
+    //     "expectedRepaymentAmount": "Rs 1,03,136.78"
+    // },
+    // {
+    //     "fundingRate": "13%",
+    //     "investorFundedAmount": "4,0889878",
+    //     "invoicePaymentDue": "24-4-2023",
+    //     "expectedRepaymentAmount": "Rs 1,03,136.78"
+    // },
+    // {
+    //     "fundingRate": "13%",
+    //     "investorFundedAmount": "4,0889878",
+    //     "invoicePaymentDue": "24-4-2023",
+    //     "expectedRepaymentAmount": "Rs 1,03,136.78"
+    // },
+    // {
+    //     "fundingRate": "13%",
+    //     "investorFundedAmount": "4,0889878",
+    //     "invoicePaymentDue": "24-4-2023",
+    //     "expectedRepaymentAmount": "Rs 1,03,136.78"
+    // },
+
+    // ]
+     const SPACING = 20
+     const AVATAR = 70
+     const ITEM = AVATAR + SPACING *3
+ 
+     const scrollY = useRef(new Animated.Value(0)).current;
     return (
+        
+        <View style={{flex:1, backgroundColor: '#fff'}}> 
+        <Image 
+        source={require('../../../assets/roseBackground.jpg')}
+        style={StyleSheet.absoluteFillObject}
+        blurRadius={80}/>
+       
 
-        <>
-            <View style={styles.container}>
+        <Animated.FlatList
+         keyExtractor={(item, index) => item.id}
+        data={fund}
+        onScroll={Animated.event(
+            [{nativeEvent: {contentOffset:{y:scrollY}}}],
+            {useNativeDriver:true}
+        )}
+        contentContainerStyle={{
+            padding:20,
+            paddingTop:StatusBar.currentHeight ||42
+        }}
+        renderItem={({ item, index }) => {
+            const inputRange = [
+                -1,
+                0,
+                ITEM * index,
+                ITEM * (index + 2)
+            ]
+
+            const scale = scrollY.interpolate({
+                inputRange:[1,1,1,1],
+                outputRange:[1,1,1,1]
+            })
+          return  (
+           <>
+
+            <View style={{borderWidth: 1, borderColor:'blue',backgroundColor: '#5B5FB6',
+        height: 70, flexDirection:'row'}}>
+            <Image
+            source={require('../../../assets/Logo.png')}
+            style={{width: 80,height: 35 , borderRadius: 100, 
+            margin: 5, marginVertical: 15}}/>
+            <View>
+                <Text style={{color: 'white', textAlign: 'center',fontSize: 20,paddingStart: 50 }}>Invested: </Text>
+                <Text style={{color: 'white', textAlign: 'center',fontSize: 20,paddingStart: 50}}>{item.anchor}</Text>
+                </View></View>
+            <Animated.View style={{padding: 10, marginBottom: 20,
+            backgroundColor:'rgba(255,255,255,0.8)',borderBottomEndRadius:12,
+            borderBottomLeftRadius:12,
+             shadowColor: '#000',
+            shadowOffset: {
+                width: 0,
+                height:10
+            },
+        shadowOpacity: .3,
+    shadowRadius: 20,
+transform: [{scale}]           }}
+                    >
+
+            {/* <Image
+            source={require('../../../assets/Logo.png')}
+            style={{width: 80,height: 35 , borderRadius: 100, margin: 10,
+            marginStart: 20}}/>
+            */}
+           
+            <View style={{alignItems: 'center'}}>
+                
+              <Text style={{textAlign: 'center',fontSize: 20, opacity:.7, fontWeight:700,}}>{item.fundingRate}</Text>
+              <Text style={{color: 'black',textAlign: 'center',paddingBottom: 10}}>NET ANNULA YIELD</Text>
+              <Text style={{fontSize:20, opacity:.7, textAlign: 'center'}}>{item.investorFundedAmount}</Text>
+              <Text style={{color: 'black',textAlign: 'center',paddingBottom: 10}}>YOUR INVESTMENT</Text>
+              <Text style={{fontSize:20, opacity:.8, textAlign: 'center'}}>{item.invoicePaymentDue}</Text>
+              <Text style={{color: 'black',textAlign: 'center',paddingBottom: 10,}}>EXPECTED REPAYMENT DATE</Text>
+              <Text style={{fontSize:20, opacity:.7, textAlign:'center'}}>{item.expectedRepaymentAmount}</Text>
+              <Text style={{color: 'black',textAlign: 'center',paddingBottom: 10}}>EXPECTED REPAYMENT AMOUNT</Text>
+           
+              <TouchableHighlight style={{borderWidth:1,borderColor:'green', 
+            alignItems: 'center',  marginTop:20,}}>
+                <Text style={{color: 'green',textAlign:'center',padding:5}}>Investment Notes</Text></TouchableHighlight>
+            </View>
+
+            
+              </Animated.View>
+            </>              
+          )     
+        }}
+        ListFooterComponent={renderFooter}
+        onEndReached={handleLoadMore}
+        onEndReachedThreshold={0}
+      />
+        
+
+       
+            {/* <View style={styles.container}>
 
                 <Text style={{
                     alignItems: 'center', color: 'black', textAlign: 'center',
@@ -149,13 +280,13 @@ const NewFunding = () => {
                 </ScrollView>
 
 
-            </View>
+            </View> */}
 
 
 
 
 
-        </>
+        </View>
 
     )
 }
