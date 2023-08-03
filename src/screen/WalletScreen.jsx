@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert, Button } from 'react-native';
 import { BASE_URL } from '../constants/Config';
 import { COLORS, FONTWIEGHT, SIZES } from '../constants/theme';
 import { AuthContext } from '../context/AuthContext';
@@ -7,7 +7,7 @@ import Icon4 from 'react-native-vector-icons/MaterialCommunityIcons'
 import Spinner from "react-native-loading-spinner-overlay/lib";
 import { Modal } from 'react-native';
 import { TextInput } from 'react-native';
-import { Pressable } from 'react-native';
+
 
 
 
@@ -16,33 +16,35 @@ const WalletScreen = ({ navigation }) => {
     const [wallet, setWallet] = React.useState({})
     const [loading, setLoading] = React.useState(false)
     const [modal, setModal] = React.useState(false)
-    const [add, setAdd] = React.useState({})
+    const [amount, setAmount] = React.useState({})
 
     const { userInfo } = React.useContext(AuthContext);
     // console.log(userInfo)
     const token = userInfo.data?.accessToken
+    // console.log(token)
 
-    var myHeaders = new Headers();
-    myHeaders.append("Authorization", token);
 
-    var raw = "";
-
-    var requestOptions = {
-        method: 'GET',
-        headers: myHeaders,
-        body: raw,
-        redirect: 'follow'
-    };
 
     const getData = () => {
         setLoading(true)
+        var myHeaders = new Headers();
+        myHeaders.append("Authorization", token);
+
+        var raw = "";
+
+        var requestOptions = {
+            method: 'GET',
+            headers: myHeaders,
+            body: raw,
+            redirect: 'follow'
+        };
         fetch(`${BASE_URL}/wallet/wallet-balance`, requestOptions)
             .then(function (response) {
                 return response.json();
             }).
             then(function (myJson) {
                 let cont = myJson.data.finvridhhiWallet;
-                console.log('fungcheck', cont)
+                // console.log('fungcheck', cont)
                 setWallet(cont)
                 setLoading(false)
             }).catch(function (error) {
@@ -55,9 +57,49 @@ const WalletScreen = ({ navigation }) => {
         getData()
     }, [])
 
-    // const getWithdraw = () => {
-    //     setLoading(true)
-    //     fetch(`${BASE_URL}/wallet/withdrawal`, requestOptions) }
+
+
+
+
+    const getWithdraw = async () => {
+        var raw = JSON.stringify({
+            "amount": amount
+        })
+        const token = userInfo.data?.accessToken;
+        // const header = {
+        //     "headers": {
+        //         "Authorization": token
+                
+        //     }
+        // }
+        var requestOptions1 = {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',  // I added this line
+                "Authorization": token
+            },
+            body: raw,
+
+        }
+        fetch(`${BASE_URL}/wallet/withdrawal`, requestOptions1)
+            .then(response => response.text())
+            .then(result =>
+                // console.log(result)
+                
+                {
+                    let check = result
+                    // if(!amount.trim()){
+                     
+                            Alert.alert('Funds will reflect in your registered bank account within 1 business day')
+                       navigation.navigate("NewHome")
+                    
+                    console.log(result)
+                }
+                 )                
+            .catch(error => console.log('error', error));
+    }
+
 
 
 
@@ -74,7 +116,7 @@ const WalletScreen = ({ navigation }) => {
                         />
                         <Text style={styles.Text0}>Wallet</Text>
                     </View>
-                    
+
                 </View>
                 <Spinner visible={loading} />
                 <View style={styles.View1}>
@@ -93,35 +135,35 @@ const WalletScreen = ({ navigation }) => {
                                 WALLET NET BALANCE
                             </Text>
                             <TouchableOpacity style={styles.touchable1}
-                              onPress={() => navigation.navigate('NewHome')}>
+                                onPress={() => navigation.navigate('NewHome')}>
                                 <Text style={styles.Text4} >
                                     My Investment
                                 </Text>
                             </TouchableOpacity>
                         </View>
-                        
+
                         <View style={styles.View4} >
                             <Text style={styles.Text2}>
                                 Rs {wallet.afterOfferDeduct}
                             </Text>
                             <Text style={styles.Text3}>
-                            WALLET GROSS BALANCE
+                                WALLET GROSS BALANCE
                             </Text>
 
                             <TouchableOpacity style={styles.touchable1}
-                               onPress={() => setModal(true)}>
+                                onPress={() => setModal(true)}>
                                 <Text style={styles.Text4} >
                                     Withdraw Funds
                                 </Text>
                             </TouchableOpacity>
                         </View>
-                        
+
                         <View style={styles.View4} >
                             <Text style={styles.Text2}>
                                 Rs {wallet.offerMadeFund}
                             </Text>
                             <Text style={styles.Text3}>
-                            OFFERS MADE
+                                OFFERS MADE
                             </Text>
                             <TouchableOpacity style={styles.touchable1}
                                 onPress={() => navigation.navigate('WalletStatement')}>
@@ -131,56 +173,60 @@ const WalletScreen = ({ navigation }) => {
                             </TouchableOpacity>
                         </View>
                         <Modal
-                                    backdropOpacity={0.3}
+                            backdropOpacity={0.3}
+                            animationType="fade"
+                            transparent
+                            visible={modal}
+                            onRequestClose={() => {
+                                Alert.alert('Modal has been closed.');
+                                setModal(!modal);
+                            }}>
+                            <View style={styles.centeredView}>
 
-                                    animationType="fade"
-                                    transparent
-                                    visible={modal}
-                                    onRequestClose={() => {
-                                        Alert.alert('Modal has been closed.');
-                                        setModal(!modal);
-                                    }}>
-                                    <View style={styles.centeredView}>
-
-                                        <View style={styles.modalView}>
-                                            <Text style={styles.modalText}>Funding</Text>
-
+                                <View style={styles.modalView}>
+                                    <Text style={styles.modalText}>Withdraw Fund</Text>
 
 
-                                            <Text style={{ color: 'black', paddingBottom: 10, fontSize: 20, fontFamily: 'serif' }}>Wallet Net Balance: </Text>
+
+                                    <Text style={{ color: 'black', paddingBottom: 10, fontSize: 20, fontFamily: 'serif' }}>Amount: </Text>
+                                    <View>
+
+
+                                        <View >
+
+
                                             <View>
 
-
-                                                <View >
-
-
-                                                    <View>
-                                                        <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 16, fontFamily: 'system-ui' }}>Enter Funding Amount:</Text>
-                                                        <TextInput style={styles.input}  type='number'
-                                                            placeholder='Enter the Number '
-                                                            onChangeText={number => setAdd(number)} />
-                                                    </View>
-                                                    <View style={styles.touch}>
-                                                        <TouchableOpacity>
-                                                            <Pressable
-                                                                onPress={() => setModal(!modal)}>
-                                                                <Text style={styles.textStyle}>Close</Text>
-                                                            </Pressable>
-                                                        </TouchableOpacity>
-                                                        <TouchableOpacity>
-
-                                                            <Pressable
-                                                                >
-                                                                <Text style={styles.textStyle1}>Add Funding</Text>
-                                                            </Pressable>
-                                                        </TouchableOpacity>
-                                                    </View>
-                                                </View>
+                                                <TextInput style={{
+                                                    backgroundColor: 'white',
+                                                    borderRadius: 10,
+                                                }} 
+                                                keyboardType = 'numeric'
+                                                    placeholder='Enter the Number '
+                                                    value={amount}
+                                                    onChangeText={text => setAmount(text)}
+                                                // onChangeText={number => setAdd(number)}
+                                                />
                                             </View>
+                                            <View style={styles.touch}>
+                                                <TouchableOpacity  onPress={() => setModal(!modal)}>
+                                                   
+                                                        <Text style={styles.textStyle}>Close</Text>
+                                                  
+                                                </TouchableOpacity>
+                                                <TouchableOpacity onPress={ getWithdraw} >
 
+                                                  
+                                                        <Text style={styles.textStyle1}>Withdraw</Text>
+                                                   
+                                                </TouchableOpacity>
+                                            </View>
                                         </View>
                                     </View>
-                                </Modal>
+
+                                </View>
+                            </View>
+                        </Modal>
 
                     </View>
                 </View>
@@ -261,7 +307,7 @@ const styles = StyleSheet.create({
     View0: {
         paddingHorizontal: 10, paddingTop: 20
     },
-    
+
     centeredView: {
         flex: 1,
         justifyContent: 'center',
@@ -271,7 +317,7 @@ const styles = StyleSheet.create({
     },
     modalView: {
         margin: 0,
-        backgroundColor: 'white',
+        backgroundColor: 'pink',
         borderRadius: 20,
         padding: 20,
         width: 350,

@@ -1,20 +1,17 @@
-import React, { useState, useContext, useEffect, useRef } from 'react';
-import {  StyleSheet, Text, View, Alert, ScrollView, Button, TextInput } from 'react-native';
-import { BASE_URL } from '../../constants/Config';
-import Spinner from "react-native-loading-spinner-overlay/lib";
-import { AuthContext } from '../../context/AuthContext';
-import { COLORS, SIZES } from '../../constants/theme';
-import { Picker } from '@react-native-picker/picker';
-import RNHTMLtoPDF from 'react-native-html-to-pdf'
-import RNFS from 'react-native-fs'
-import Share from 'react-native-share'
+import { View, Text } from 'react-native'
+import React, { useContext, useState } from 'react'
+import { StyleSheet } from 'react-native'
+import { useEffect } from 'react'
+import { BASE_URL } from '../../../constants/Config'
+import { AuthContext } from '../../../context/AuthContext'
+import { ScrollView } from 'react-native'
+import { TextInput } from 'react-native'
+import { Picker } from '@react-native-picker/picker'
+import { Button } from 'react-native'
+import { SIZES } from '../../../constants/theme'
+import Spinner from 'react-native-loading-spinner-overlay'
 
-
-
-
-
-const NewSettlement = () => {
-
+const WalletReport = () => {
   const [settle, setSettle] = useState()
   const [dataSettle, setDataSettle] = useState([])
   const [loading, setLoading] = useState(false)
@@ -28,46 +25,24 @@ const NewSettlement = () => {
 
 
 
-  const token = userInfo.data?.accessToken
+  
+
+
+  const getData1 = () => {
+    const token = userInfo.data?.accessToken
   var myHeaders = new Headers();
   myHeaders.append("Authorization", token);
 
   var raw = "";
 
   var requestOptions = {
-    method: 'POST',
+    method: 'GET',
     headers: myHeaders,
     body: raw,
     redirect: 'follow'
   };
-  const getData = () => {
-    setLoading(true)
-    fetch(`${BASE_URL}/transaction/investor-transaction`, requestOptions)
-      .then(function (response) {
-        if (response.ok) {
-          return response.json();
-        }
-        throw new Error('Something went wrong.')
-      }).
-      then(function (myJson) {
-        let result = myJson
-        //  console.log("cehdkjdlkfjdlfkjdlfkjdfldkjf", result)
-        setSettle(result)
-        setLoading(false)
-      })
-      .catch(function (error) {
-        console.warn('Request failed', error)
-        setLoading(false)
-      })
-  }
 
-  useEffect(() => {
-    getData()
-  }, [])
-
-  const getData1 = () => {
-
-    fetch(`${BASE_URL}/transaction/investor-transaction`, requestOptions)
+    fetch(`${BASE_URL}/transaction/getWalletStatement`, requestOptions)
       .then(function (response) {
         if (response.ok) {
           return response.json();
@@ -77,7 +52,7 @@ const NewSettlement = () => {
       }).
       then(function (myJson) {
         let result = myJson.data
-        // console.log("cehdkjdlkfjdlfkjdlfkjdfldkjf", result)
+         console.log("cehdkjdlkfjdlfkjdlfkjdfldkjf", result)
         setDataSettle(result)
       })
       .catch((error) => {
@@ -113,17 +88,7 @@ const NewSettlement = () => {
   const totalItems = dataSettle?.length; // Replace `data` with your actual data array
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
-  const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
 
-  const handlePrevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
 
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
@@ -254,19 +219,18 @@ const NewSettlement = () => {
       <Spinner visible={loading} />
      
 
-      {settle?.code === 500 ? Alert.alert('You have not funded an invoice yet, or the invoices you funded are not yet settled.') : (
+      {/* {settle?.code === 500 ? Alert.alert('No data') : ( */}
         <ScrollView horizontal={true}>
      <View>
            
      <View style={{ flexDirection: 'row' }}>
-        <Text style={styles.tableHeader}>INVOICE</Text>
+        <Text style={styles.tableHeader}>INVOICE ID</Text>
         <Text style={styles.tableHeader}>TYPE</Text>
-        <Text style={styles.tableHeader}>AMOUNT</Text>
+        <Text style={styles.tableHeader}>BENEFICIARY</Text>
+        <Text style={styles.tableHeader}>WITHDRAWAL</Text>
+        <Text style={styles.tableHeader}>DEPOSIT</Text>
         <Text style={styles.tableHeader}>DATE</Text>
-        <Text style={styles.tableHeader}>Tenure</Text>
-        <Text style={styles.tableHeader}>No</Text>
-        <Text style={styles.tableHeader}>AMOUNT</Text>
-        <Text style={styles.tableHeader}>DATE</Text>
+        
       </View>
 
           {search(data)?.slice(0, paginate).map((item, index) =>
@@ -274,12 +238,11 @@ const NewSettlement = () => {
 
               <Text style={styles.tableCell}>{item.invoiceRefID}</Text>
               <Text style={styles.tableCell}>{item.transactionType}</Text>
-              <Text style={styles.tableCell}> {item.transactionAmount}</Text>
-              <Text style={styles.tableCell}>{item.transactionDate}</Text>
-              <Text style={styles.tableCell}>{item.invoiceRefID}</Text>
-              <Text style={styles.tableCell}>{item.transactionType}</Text>
-              <Text style={styles.tableCell}> {item.transactionAmount}</Text>
-              <Text style={styles.tableCell}>{item.transactionDate}</Text>
+              <Text style={styles.tableCell}> {item.userName}</Text>
+              <Text style={styles.tableCell}>{item.Withdrawal}</Text>
+              <Text style={styles.tableCell}>{item.Deposit}</Text>
+              <Text style={styles.tableCell}>{item.createdOn}</Text>
+              
             </View>
           )}
      </View>
@@ -289,9 +252,7 @@ const NewSettlement = () => {
 
         </ScrollView>
         
-      )
-
-      }
+     
         <View style={{
             flexDirection: 'row', justifyContent: 'flex-end', marginHorizontal: 10,
             paddingRight: 10, marginTop: 20
@@ -318,7 +279,7 @@ const NewSettlement = () => {
 
 
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -375,6 +336,4 @@ const styles = StyleSheet.create({
 });
 
 
-
-export default NewSettlement;
-
+export default WalletReport

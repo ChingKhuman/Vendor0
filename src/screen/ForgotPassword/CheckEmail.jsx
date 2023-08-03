@@ -1,9 +1,12 @@
 import { View, Text } from 'react-native'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useState } from 'react';
 import { TextInput } from 'react-native';
 import { Button } from 'react-native';
 import axios from 'axios';
+import { BASE_URL } from '../../constants/Config';
+import { Alert } from 'react-native';
+import { black } from 'react-native-paper/lib/typescript/src/styles/themes/v2/colors';
 
 const CheckEmail = ({navigation}) => {
     const [userEmail, setUserEmail] = useState('');
@@ -13,8 +16,19 @@ const CheckEmail = ({navigation}) => {
       setIsLoading(true);
       // Send a password reset request to the API
       axios
-        .put('http://192.168.157.212:9080/account/change-password', { userEmail })
+        .post('http://192.168.0.163:9902/account/reset-password-initiate', { userEmail })
         .then(response => {
+          let dat = response.data
+          {if (dat.code === 400) {
+            Alert.alert("User Not Register")
+            
+          } else {
+            setUserEmail(dat)
+            Alert.alert('Please check in your mail')
+            
+          }}
+          //  console.log('check.....', response)
+         
           // Handle success, e.g., show a success message or navigate to a confirmation screen
           console.log('Password reset request successful');
         })
@@ -26,20 +40,34 @@ const CheckEmail = ({navigation}) => {
           setIsLoading(false);
         });
     };
+
+  
+  
+  // empty dependency array means this effect will only run once (like componentDidMount in classes)
+ 
+  
   
     return (
-      <View>
+      <View style={{alignItems:'center' , paddingTop: "50%"}}>
+        <Text style={{fontSize: 20, }}>Reset Password</Text>
         <TextInput
-          placeholder="Email"
+          placeholder="Enter your Register Email"
           value={userEmail}
           onChangeText={text => setUserEmail(text)}
+          style={{ width: "80%", borderWidth: 1, borderColor: 'black', marginVertical: 20}}
         />
-        <Button
-          title="Reset Password"
-          onPress={handleResetPassword}
-          disabled={isLoading || !userEmail}
-        />
-          <Button title='Go to Login Page' onPress={()=> (navigation.navigate('Login'))} />
+       <View style={{}}>
+       <Button         
+        title="Reset Password"
+        onPress={handleResetPassword}
+        disabled={isLoading || !userEmail}
+        
+      />
+      <View>
+        <Text></Text>
+      </View>
+        <Button title='Go to Login Page' onPress={()=> (navigation.navigate('Login'))} />
+       </View>
 
       </View>
     );

@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StatusBar,
   Dimensions,
+  Image,
 } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 import LinearGradient from "react-native-linear-gradient";
@@ -29,6 +30,10 @@ const Lo = ({ navigation }) => {
           duration={1500}
           style={styles.logo}
           resizeMode="stretch" /> */}
+           <Image
+            source={require('../../assets/Logo.jpg')}
+            style={{width: 300,height: 105 , borderRadius: 100, 
+            margin: 5, marginVertical: 15}}/>
       </View>
 
       <Animatable.View style={styles.footer}

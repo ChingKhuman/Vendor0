@@ -6,19 +6,17 @@ import { ScrollView } from "react-native-gesture-handler";
 import { BASE_URL } from "../../constants/Config";
 import { Dimensions } from "react-native";
 import Spinner from "react-native-loading-spinner-overlay";
+import AccordionFag from "./AccordionFag";
 
 const Faq = () => {
 
 
     const [loading, setLoading] = useState(false)
     const [faq, setFaq] = useState([])
-    const { userInfo } = useContext(AuthContext);
-    const [currentIndex, setCurrentIndex] = useState(null)
-    const ref = useRef()
-    const screen = Dimensions.get('window').width;
+    const { userInfo } = useContext(AuthContext)
     // console.log(userInfo)
     const token = userInfo.data?.accessToken
-    console.log(token)
+    // console.log(token)
     const regex = /(<([^>]+)>)/ig;
     var myHeaders = new Headers();
     myHeaders.append("Authorization", token);
@@ -44,7 +42,7 @@ const Faq = () => {
             then(function (myJson) {
                 let result = myJson.data
                 setFaq(result)
-                //  console.log('check...result..', result)
+                //   console.log('check...result..', result)
                 setLoading(false)
 
             })
@@ -58,20 +56,45 @@ const Faq = () => {
     useEffect(() => {
         getData()
     }, [])
+
+    const [isExpanded, setIsExpanded] = useState(false);
+
+    const toggleAccordion = () => {
+        setIsExpanded(!isExpanded);
+      };
+    const FaqAccordion =({question,answer})=> {
+      
+        <View>
+           
+            <TouchableOpacity onPress={toggleAccordion}>
+        <Text>{question}</Text>
+      </TouchableOpacity>
+      {isExpanded && <Text>{answer}</Text>}
+                </View>
+        
+    }
+
+
     return (
         <ScrollView>
-            <View>
+            <View style={{paddingHorizontal: 8}}>
                 <View>
-                    <Text style={{ fontSize: SIZES.h2, padding: 7 }}> Faqs</Text>
-                    <View style={{ flexDirection: 'row' }}>
-                        <Text style={{ fontSize: SIZES.h4, padding: 7, color: 'orange' }}> Home /</Text>
-                        <Text style={{ fontSize: SIZES.h4, padding: 7 }}>Faqs</Text>
-                    </View>
+                    <Text style={{ fontSize: SIZES.h2, padding: 7,textAlign:"center"
+                 }}> Faqs</Text>
+                    
                 </View>
-                <Text> This is actual Data, Cant make dummy data. Confused on data format</Text>
-                {/* <Spinner visible={loading} /> */}
+                    {/* <Spinner visible={loading} /> */}
                 <View style={{paddingHorizontal: 10}}>
-                    {faq.map(({question, answer}, index) => {
+                   
+                {
+                    faq.map((item, index)=> (
+                        <AccordionFag key={index} question={item.question}
+                        answer={item.answer}
+                       />
+                   
+                    ))
+                }
+                    {/* {faq.map(({question, answer}, index) => {
                         return (
                             <View style={{}} key={index}>
                                 <TouchableOpacity key={question}
@@ -87,7 +110,7 @@ const Faq = () => {
                                 )}
                             </View>
                         )
-                    })}
+                    })} */}
                 </View>
             </View>
         </ScrollView>

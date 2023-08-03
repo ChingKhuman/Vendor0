@@ -45,10 +45,9 @@ export default function WalletStatement() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
 
-  const tableData = table?.slice(startIndex, endIndex);
-
-  const filteredData = tableData?.filter(item => item.credit.includes(searchQuery))
-  console.log('checking filter', filteredData)
+  const filteredData = table?.filter(item => item.beneficiaryName.includes(searchQuery))
+  const tableData = filteredData?.slice(startIndex, endIndex);
+  // console.log('checking filter', filteredData)
 
 
   //---------------------Sorting-----------
@@ -102,7 +101,7 @@ export default function WalletStatement() {
   const arr = [];
   const arrOfObj = table?.forEach(object => {
     arr.push(object.beneficiaryName)
-    console.log(arrOfObj)
+    // console.log(arrOfObj)
   })
 
   //-----------------Pdf generate
@@ -270,7 +269,7 @@ export default function WalletStatement() {
               <Text style={styles.tableHeader}>Remarks</Text>
             </View>
 
-            {filteredData?.map((item, index) =>
+            {tableData?.map((item, index) =>
 
 
               <View style={{ flexDirection: 'row' }} key={index}>

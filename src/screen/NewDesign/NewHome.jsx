@@ -1,12 +1,17 @@
-import { View, Text, TouchableOpacity, StyleSheet, RefreshControl, Dimensions, Animated } from 'react-native'
+import { View, Text, TouchableOpacity, StyleSheet, RefreshControl, Dimensions, Animated, TextInput } from 'react-native'
 import React, { useRef, useState, useEffect, useContext } from 'react'
 import { ScrollView } from 'react-native'
 import { AuthContext } from '../../context/AuthContext';
 import { BASE_URL } from '../../constants/Config';
 import { Card } from 'react-native-paper';
-import { VictoryArea, VictoryAxis, VictoryBar, VictoryChart, VictoryLabel, VictoryLine, VictoryPie, VictoryTheme } from 'victory-native';
+import { VictoryAxis, VictoryBar, VictoryChart, VictoryLine, VictoryPie, VictoryTheme } from 'victory-native';
 import RadioForm from 'react-native-simple-radio-button';
-import { COLORS } from '../../constants/theme';
+import { useColorScheme } from 'react-native';
+import { Modal } from 'react-native';
+import { Button } from 'react-native';
+import DropDownPicker from 'react-native-dropdown-picker';
+import { Alert } from 'react-native';
+
 
 
 
@@ -14,7 +19,7 @@ import { COLORS } from '../../constants/theme';
 
 const NewHome = ({ navigation }) => {
 
-
+    const [modalVisible, setModalVisible] = useState(true);
     const [pieCount, setPieCount] = useState([]);
     const [pieAmount, setPieAmount] = useState([])
     const [yieVal, setYieVal] = useState([])
@@ -23,9 +28,9 @@ const NewHome = ({ navigation }) => {
     const windowWidth = Dimensions.get('window').width;
     const [pieData, setpieData] = useState([]);
     const [pieAData, setpieAData] = useState([])
-    const { userInfo } = useContext(AuthContext);
+    const { userInfo, logout } = useContext(AuthContext);
     const token = userInfo.data?.accessToken;
-    console.log(token)
+   
 
 
     var myHeaders = new Headers();
@@ -60,7 +65,7 @@ const NewHome = ({ navigation }) => {
                 });
                 setLaoding(false)
                 setpieData(colorData)
-                 console.log('checking.....',colorData)
+                //  console.log('checking.....',colorData)
             }).catch(function (error) {
                 console.log(error)
                 setLaoding(false)
@@ -97,7 +102,7 @@ const NewHome = ({ navigation }) => {
             }).catch(function (error) {
                 console.log(error)
             })
-            }
+    }
     useEffect(() => {
         getData1()
     }, []);
@@ -106,9 +111,9 @@ const NewHome = ({ navigation }) => {
         return a.totalOfferedAmount - b.totalOfferedAmount
     })
 
-        const victoryAmount = pieAmount.map(a => a.name)
-         console.log(victoryAmount)
- 
+    const victoryAmount = pieAmount.map(a => a.name)
+    //  console.log(victoryAmount)
+
 
     const getDataYield = () => {
         fetch(`${BASE_URL}/dashboard/dashboardsummary`, requestOptions)
@@ -129,41 +134,51 @@ const NewHome = ({ navigation }) => {
 
 
     const onRefresh = React.useCallback(() => {
-        setRefreshing(true);
-        setTimeout(() => {
-            setRefreshing(false);
-        }, 2000);
-    }, []);
+        fetch( `${BASE_URL}/account/validate-jwt`, requestOptions)
+            .then(function (response){
+            if(response.ok){              
+                return response.json();
+            }
+            throw new Error ('Something went wrong')
+
+            }).then(function(myJson){
+                 let result = myJson.data
+                console.log('Check......',result)
+               
+                {
+                            if (result === null) {
+                                Alert.alert('Session Expire, Please Logout')
+                                
+                            }
+                            else {
+                                setRefreshing(true);
+                                setTimeout(() => {
+                                    setRefreshing(false);
+
+                                }, 4000);
+                            }
+                        }
+            })
+            .catch(function (error) {
+                console.warn('Request failed', error)
+                
+            })
+   }, []);
 
 
     const series1 = pieCount.map(item =>
         item.allOfferCount
     )
 
-    
 
-    
-        // Set different color styles based on x value
-        let getColorBasedOnX = pieCount.map(i => 
-           {
-            if (i.name === 'Settled') {
-                return 'green';
-              } else if (i.name === 'Offered') {
-                return 'blue';
-              } else if (i.name === 'Accepted') {
-                return '#92CDE2';
-              } else {
-                return 'violet';
-            }
-           }
-            )
-        // Default color for other values
-      
-      
+
+
+    // Set different color styles based on x value
+
+    // Default color for other values
+
+
     const sliceColor = ['green', 'blue', 'violet', '#92CDE2']
-
-
-
     const sliceColor1 = ['red', 'blue', 'green', '#2C5AA2']
 
     const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -196,372 +211,617 @@ const NewHome = ({ navigation }) => {
     const radio_props = [
         { label: 'Bar', value: 0 },
         { label: 'Pie', value: 1 },
-        { label: 'Area', value: 2 }
+        
     ]
 
     const radioProps = [
         { label: 'BarA', value: 0 },
         { label: 'PieA', value: 1 },
-        { label: 'Area', value: 2 }
+       
     ]
 
     const animation = useRef(new Animated.Value(0)).current;
     const [isButtonClick, setIsButtonClick] = useState(false);
 
-    const toggleButton = () => {
-        let toValue = isButtonClick ? 0 : 1;
-        Animated.spring(animation, {
-            toValue,
-            friction: 5,
-            useNativeDriver: true
-        }).start();
-        setIsButtonClick(!isButtonClick);
-    };
-    const rotation = {
-        transform: [
-            {
-                rotate: animation.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: ["0deg", "45deg"]
-                })
-            }
-        ]
-    };
-    const style1 = {
-        transform: [
-            {
-                scale: animation
-            },
-            {
-                translateY: animation.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0, -10]
-                })
-            },
-            {
-                translateX: animation.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0, 120]
-                })
-            }
-        ]
-    };
-    const style2 = {
-        transform: [
-            {
-                scale: animation
-            },
-            {
-                translateY: animation.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0, -10]
-                })
-            },
-            {
-                translateX: animation.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0, -130]
-                })
-            }
-        ]
+    const theme = useColorScheme();
+    const isDarkTheme = theme === 'dark';
+
+
+    //-----------------Nominiee
+    const [initialData, setInitialData] = useState({});
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", token);
+
+    var requestOptions = {
+        method: 'GET',
+        headers: myHeaders,
+        redirect: 'follow'
     };
 
-   
+    fetch(`${BASE_URL}/usermanage/nominee-check`, requestOptions)
+        .then(response => response.text())
+        .then(result => {
+            let res = result
+            // console.log(res)    
+            setInitialData(res)
+        })
+        .catch(error => console.log('error', error));
+
+    //---------------Nominee Add--------------
+    const handleNominee = () => {
+
+        const formData = new FormData();
+        formData.append("nDNomName", formValue.nDNomName);
+        formData.append("nDNomRelationship", formValue.nDNomRelationship);
+        formData.append("nDNomMobile", formValue.nDNomMobile);
+        formData.append("nDNomMailID", formValue.nDNomMailID);
+        formData.append("nDNomAddress", formValue.nDNomAddress);
+
+        const token2 = userInfo.data?.accessToken;
+        var myHeaders = new Headers();
+        myHeaders.append("Authorization", token2);
+        const requestOptions2 = {
+            method: 'POST',
+            headers: myHeaders,
+            body: formData
+        }
+        fetch(`${BASE_URL}/usermanage/add-nominee`, requestOptions2)
+            .then(response => response.json())
+            .then(result => {
+               
+                setModalVisible(!modalVisible)
+                Alert.alert('Nominee added sucessfull')
+             //    console.log(result)
+            }
+            )
+    }
+
+    const [listOpen, setListOpen] = useState(false);
+    const [formValue, setFormValue] = useState({
+        nDNomName: '',
+        nDNomRelationship: '',
+        nDNomMobile: '',
+        nDNomMailID: '',
+        nDNomAddress: '',
+    });
+
+    const listData = [
+        { label: 'Spouse', value: '1' },
+        { label: 'Adult Child', value: '2' },
+        { label: 'Minor Child', value: '3' },
+        { label: 'Mother', value: '4' },
+        { label: 'Father', value: '5' },
+        { label: 'Sibling', value: '6' },
+        { label: 'Legal Gaurdian', value: '7' },
+        { label: 'Unrealated Person', value: '8' },
+
+    ]
+
+    //-------------------show Hide---------
+    const [showTextInput, setShowTextInput] = useState(false);
+    const [selectedValue, setSelectedValue] = useState('');
+
+    const handleDropdownChange = (itemValue) => {
+        setSelectedValue(itemValue);
+        setShowTextInput(itemValue === 'Minor Child'); // Set the condition based on your dropdown options
+    };
+
+    //-------------------Auto invest
+    const [isUpdateOn, setIsUpdateOn] = useState(false);
+    const AutoOn = () => {
+        const token1 = userInfo.data?.accessToken;
+        var requestOptions3 = {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Authorization': token1
+            }
+        }
+        fetch(`${BASE_URL}/autoinvest/auto-invest-on/2`, requestOptions3)
+            .then(response => response.text())
+            .then(result => {
+                Alert.alert('You have successfully turn on EMI')
+                setIsUpdateOn((prev) => !prev);
+                console.log(result)
+            }
+
+            )
+
+            .catch(error => console.log('error', error));
+
+
+    }
+
+    //-----------------Auton Invest off
+    
+    const AutoOf = () => {
+        const token1 = userInfo.data?.accessToken;
+        var requestOptions3 = {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Authorization': token1
+            }
+        }
+        fetch(`${BASE_URL}/autoinvest/auto-invest-off`, requestOptions3)
+            .then(response => response.text())
+            .then(result => {
+                Alert.alert('You have successfully turn off EMI')
+                setIsUpdateOn((prev) => !prev);
+                console.log(result)
+            }
+            )
+
+            .catch(error => console.log('error', error));
+
+
+    }
+
+
+
 
     return (
 
         <>
-           
-           <ScrollView
-                    // contentContainerStyle={styles.scrollView}
-                    refreshControl={
-                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
-            {/* <View > */}
-               
-                    <View style={styles.container}>
-                        <View style={{
-                            backgroundColor: 'white', marginVertical: 30, borderRadius: 5,
-                            marginHorizontal: 10
-                        }}>
+            {
+                initialData ?
+                    <Modal
+                        animationType="slide"
+                        transparent={true}
+                        visible={modalVisible}
+                        onRequestClose={() => setModalVisible(false)}
+                    >
+                        <View style={styles.centeredView}>
 
-                            <View style={{
-                                paddingHorizontal: 10, marginTop: 20,
-                                justifyContent: 'space-between',
-                            }}>
-                                <Text style={styles.Text5}> YIELDS </Text>
+
+                            <View>
                                 <Text style={{
-                                    color: '#27666A', fontSize: 15,
-                                    marginBottom: 1, fontFamily: 'sans-serif',
-                                }}> Total Yield</Text>
+                                    color: 'white', fontSize: 15, textAlign: 'center', paddingTop: 10,
+                                    borderWidth: 1, borderColor: 'green', backgroundColor: 'green'
+                                }}>Add Nominee</Text>
+                            </View>
+                            <View >
 
-                                <Text style={{ fontSize: 13, color: '#27666A', paddingLeft: 7, paddingBottom: 10 ,
-                            borderBottomWidth:1, borderColor:'grey',}}>Rs. {yieVal.totalYield}</Text>
+                                <View style={{ width: 250, alignItems: 'center' }}>
+                                    <TextInput
+                                        name="Name"
+                                        placeholder="Name"
+                                        style={styles.textInput}
+                                        defaultValue={formValue.nDNomName}
+                                        onChangeText={(item) => setFormValue({
+                                            ...formValue,
+                                            nDNomName: item
+                                        })}
+
+                                    />
+                                    <DropDownPicker
+                                        onChangeValue={handleDropdownChange}
+                                        containerProps={{ height: listOpen === true ? 220 : null, }}
+                                        style={{ position: 'relative', }}
+                                        placeholder="Select"
+                                        placeholderStyle={styles.dropdownPlaceholder}
+                                        open={listOpen}
+                                        setOpen={itemValue => setListOpen(itemValue)}
+                                        items={listData}
+                                        value={formValue.nDNomRelationship}
+                                        setValue={(item) => setFormValue({
+                                            ...formValue,
+                                            nDNomRelationship: item(),
+                                        })}
+                                    />
+                                    {showTextInput && (
+                                        <TextInput
+                                            style={styles.textInput}
+                                            placeholder='Legal Gaurdian' />
+                                    )}
+                                    <TextInput
+                                        name="Mobile"
+                                        placeholder="Mobile"
+                                        style={styles.textInput}
+                                        defaultValue={formValue.nDNomMobile}
+                                        onChangeText={(item) => setFormValue({
+                                            ...formValue,
+                                            nDNomMobile: item
+                                        })}
+
+                                    />
+                                    <TextInput
+                                        name="Mail"
+                                        placeholder="Mail"
+                                        style={styles.textInput}
+                                        defaultValue={formValue.nDNomMailID}
+                                        onChangeText={(item) => setFormValue({
+                                            ...formValue,
+                                            nDNomMailID: item
+                                        })}
+
+                                    />
+
+                                    <TextInput
+                                        name="Address"
+                                        placeholder="Address"
+                                        style={styles.textInput}
+                                        defaultValue={formValue.nDNomAddress}
+                                        onChangeText={(item) => setFormValue({
+                                            ...formValue,
+                                            nDNomAddress: item
+                                        })}
+
+                                    />
+
+
+
+                                    <View style={styles.container}>
+                                        <TouchableOpacity style={{ width: 100, height: 30, marginTop: 20 }}
+                                            //  onPress={()=> Alert.alert("Form Value", JSON.stringify(formValue))}
+                                            onPress={handleNominee}
+                                        >
+                                            <Text style={{ color: 'white', textAlign: 'center' }}>Submit</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                    <Button title='CLose' onPress={() => setModalVisible(false)} />
+                                </View>
 
                             </View>
 
-                           
-                                <Text style={{height: 25,marginVertical:10, color: 'blue', fontFamily: 'sans-serif', textAlign: 'center' }}>  Note: The ....</Text>
-                           
+
                         </View>
-                          </View>
-                    {/* </View> */}
+                    </Modal> : (
+                        <></>
+                    )
+            }
 
-                    <View style={styles.headers}>
+          
+            <ScrollView style={[
+                {
+                    flex: 0,
+
+                },
+                isDarkTheme
+                    ? { backgroundColor: 'black' }
+                    : { backgroundColor: 'white' },
+            ]}
+                // contentContainerStyle={styles.scrollView}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
+                {/* <View > */}
+
+                <View style={styles.container}>
+                <View  style={{ alignItems: 'flex-end',padding: 10,
+            borderRadius: 10 }}>
+                {
+                    isUpdateOn ?
+                        (<TouchableOpacity  onPress={AutoOf}>
+                         
+                          <Text style={{textAlign:'right', padding: 10,
+                          backgroundColor: 'orange',borderRadius: 100 }} >AOTO OFF</Text>
                        
-                            <Card style={{ width: 370 }} >
+                           
+                        </TouchableOpacity>
+                        ) : 
+                            (<TouchableOpacity  onPress={AutoOn}>
+                           
+                              <Text style={{textAlign:'right',paddingRight: 20,borderRadius: 100, padding: 10, backgroundColor: 'green',
+                           width: 100}} >AOTO ON</Text>
+                        
+                                
+                            </TouchableOpacity>
+                            )
+                           
 
-                                <View style={{ alignItems: 'center' }}>
-                                    <Text style={{ color: 'black', padding: 5, }}>Offer Counts Details</Text>
-                                </View>
+                }
+            </View>
 
-                                <View style={{ alignItems: 'flex-end', marginTop: 5, marginRight: 5 }}>
-                                    <RadioForm
-                                        radio_props={radio_props}
-                                        formHorizontal={true}
-                                        labelHorizontal={false}
-                                        buttonColor={'#2196f3'}
-                                        onPress={(value) => setChart(value)}
+                   
+                    <View style={{
+                        backgroundColor: 'white', marginVertical: 30, borderRadius: 5,
+                        marginHorizontal: 10
+                    }}>
+
+                        <View style={{
+                            paddingHorizontal: 10, marginTop: 20,
+                            justifyContent: 'space-between',
+                        }}>
+                            <Text style={styles.Text5}> YIELDS </Text>
+                            <Text style={{
+                                color: '#27666A', fontSize: 15,
+                                marginBottom: 1, fontFamily: 'sans-serif',
+                            }}> Total Yield</Text>
+
+                            <Text style={{
+                                fontSize: 13, color: '#27666A', paddingLeft: 7, paddingBottom: 10,
+                                borderBottomWidth: 1, borderColor: 'grey',
+                            }}>Rs. {yieVal.totalYield}</Text>
+
+                        </View>
+
+
+                        <Text style={{ height: 25, marginVertical: 10, color: 'blue', fontFamily: 'sans-serif', textAlign: 'center' }}>  Note: The ....</Text>
+
+                    </View>
+                </View>
+                {/* </View> */}
+
+
+                <View style={styles.headers}>
+
+                    <Card style={{ width: 370 }} >
+
+                        <View style={{ alignItems: 'center' }}>
+                            <Text style={{ color: 'black', padding: 5, }}>Offer Counts Details</Text>
+                        </View>
+
+                        <View style={{ alignItems: 'flex-end', marginTop: 5, marginRight: 5 }}>
+                            <RadioForm
+                                radio_props={radio_props}
+                                formHorizontal={true}
+                                labelHorizontal={false}
+                                buttonColor={'#2196f3'}
+                                onPress={(value) => setChart(value)}
+                            />
+                        </View>
+                        {chart === 0
+                            ?
+                            <VictoryChart
+                                height={250}
+                                width={350}
+                                theme={VictoryTheme.material}
+                                domainPadding={{ x: 20 }}
+                                animate={{
+                                    onLoad: { duration: 1000 },
+                                    duration: 1000,
+                                    easing: "bounce"
+                                }}
+                            >
+                                <VictoryBar
+                                    style={{
+                                        data: {
+                                            fill: ({ datum }) =>
+                                                datum.name === 'Settled' ? 'green' :
+                                                    datum.name === 'Offered' ? 'blue' :
+                                                        datum.name === 'Accepted' ? '#92CDE2'
+                                                            : 'violet',
+
+                                            fillOpacity: 0.7,
+                                            strokeWidth: 3
+                                        },
+                                        labels: {
+                                            fontSize: 15,
+                                            fill: ({ datum }) => datum.x === 'Settled' ? 'red' :
+                                                datum.x === 'Accepted' ? 'green' :
+                                                    datum.x === 'Offered' ? 'violet'
+                                                        : 'blue'
+                                        }
+                                    }}
+                                    labels={({ datum }) => datum.x}
+
+                                    data={pieData}
+                                    x='name'
+                                    y='allOfferCount'
+
+
+
+                                    barRatio={0.8}
+                                    animate={{
+                                        onExit: {
+                                            duration: 500,
+
+                                        }
+                                    }}
+
+                                />
+                            </VictoryChart>
+                            : null
+                        }
+                        {chart === 1
+                            ? <View style={{ alignItems: 'center' }}>
+
+                                <VictoryChart height={250}
+                                    width={350}
+                                    theme={VictoryTheme.material}
+                                    domainPadding={{ x: 20 }}
+                                    animate={{
+                                        onLoad: { duration: 1000 },
+                                        duration: 1000,
+                                        easing: "bounce"
+                                    }}>
+                                    <VictoryPie
+                                        // width={300} // Adjust the width of the pie chart
+                                        // height={300}
+                                        innerRadius={0} // Adjust the inner radius to make the pie smaller
+                                        //  labelRadius={80} // Adjust the distance of the labels from the center of the pie
+                                        padding={50}
+                                        colorScale={sliceColor}
+                                        labels={({ datum }) => (datum.y === 0 ? "" : datum.x)}
+                                        data={pieCount}
+                                        x='name'
+                                        y='allOfferCount'
                                     />
-                                </View>
-                                {chart === 0
-                                    ?
-                                    <VictoryChart
-                                        height={250}
-                                        width={350}
-                                        theme={VictoryTheme.material}
-                                        domainPadding={{ x: 20 }}
-                                        animate={{
-                                            onLoad: { duration: 1000 },
-                                            duration: 1000,
-                                            easing: "bounce"
-                                        }}
-                                    >
-                                        <VictoryBar
-                                          style={{
+                                </VictoryChart>
+                            </View>
+                            : null
+                        }
+                        {chart === 2
+                            ? <VictoryLine data={pieCount} x='name'
+                                y='allOfferCount'
+                                colorScale={sliceColor}
+                            />
+
+                            : null
+                        }
+
+
+                        <View style={{
+                            width: windowWidth, paddingRight: 30,
+                        }}>
+                            {pieData.map((item, index) => {
+                                return (
+                                    <>
+
+                                        <View style={styles.View8} key={index}>
+                                            <Text style={{
+                                                color: item.color, fontSize: 14, paddingHorizontal: 15
+                                            }}>{item.name}:</Text>
+
+                                            <View style={{ alignItems: 'flex-end', }} >
+                                                <Text style={styles.Text7}>{item.allOfferCount}</Text>
+                                            </View>
+                                        </View>
+                                    </>
+                                )
+                            }
+
+                            )}
+
+                        </View>
+
+                    </Card>
+
+                </View>
+                <View style={{ marginVertical: 20, alignItems: 'center' }}>
+
+                    <Card style={{ width: 370 }}>
+                        <View style={{
+                            alignItems: 'center',
+                            marginTop: 20
+                        }}>
+                            <Text style={{ color: 'black', padding: 5, fontSize: 20 }}>Offer Amount Details</Text>
+                        </View>
+                        <View style={{ alignItems: 'flex-end', marginTop: 5, marginRight: 5 }}>
+                            <RadioForm
+                                radio_props={radioProps}
+                                formHorizontal={true}
+                                labelHorizontal={false}
+                                buttonColor={'#2196f3'}
+                                onPress={(value) => setChartA(value)}
+                            />
+                        </View>
+
+                        <View style={styles.View10}>
+                            {chartA === 0
+                                ?
+                                <VictoryChart
+                                    height={250}
+                                    width={350}
+                                    theme={VictoryTheme.material}
+                                    domainPadding={{ x: 20 }}
+                                    animate={{
+                                        onLoad: { duration: 500 },
+                                        duration: 500,
+                                        easing: "bounce"
+                                    }}
+                                >
+                                    <VictoryBar
+                                        data={pieAData}
+                                        x='name'
+                                        y='totalOfferedAmount'
+                                        style={{
                                             data: {
-                                                fill: ({ datum}) => 
-                                                datum.name ==='Settled' ? 'green':
-                                                datum.name === 'Offered' ? 'blue':                                               
-                                                datum.name === 'Accepted'  ? '#92CDE2'
-                                                : 'violet',
-                                                
+                                                fill: ({ datum }) =>
+                                                    datum.name === 'Settled' ? 'red' :
+                                                        datum.name === 'Offered' ? 'blue' :
+                                                            datum.name === 'Accepted' ? '#92CDE2'
+                                                                : 'green',
+
                                                 fillOpacity: 0.7,
                                                 strokeWidth: 3
                                             },
                                             labels: {
                                                 fontSize: 15,
-                                                fill: ({datum}) => datum.x ===  'Settled' ? 'red': 
-                                                datum.x === 'Accepted'  ? 'green':
-                                                datum.x === 'Offered' ? 'violet'
-                                                : 'blue'
-                                            }
-                                          }}
-                                          labels = {({ datum }) => datum.x}
-                                            
-                                            data={pieData}
-                                            x='name'
-                                            y='allOfferCount'
-                                            
-                                            
-
-                                            barRatio={0.8}
-                                            animate={{
-                                                onExit: {
-                                                    duration: 500,
-
-                                                }
-                                            }}
-                                          
-                                        />
-                                    </VictoryChart>
-                                    : null
-                                }
-                                {chart === 1
-                                    ? <View style={{ alignItems: 'center' }}>
-                                        <VictoryPie
-                                            width={300} // Adjust the width of the pie chart
-                                            height={300}
-                                            innerRadius={0} // Adjust the inner radius to make the pie smaller
-                                             labelRadius={80} // Adjust the distance of the labels from the center of the pie
-                                            padding={50}
-                                            colorScale={sliceColor}
-                                            data={pieCount}
-                                            x='name'
-                                            y='allOfferCount'
-                                        />
-                                    </View>
-                                    : null
-                                }
-                                {chart === 2
-                                    ? <VictoryLine data={pieCount} x='name'
-                                        y='allOfferCount'
-                                        colorScale={sliceColor}
-                                    />
-
-                                    : null
-                                }
-
-
-                                <View style={{
-                                    width: windowWidth, paddingRight: 30,}}>
-                                    {pieData.map((item, index) => (
-                                        <>
-                                            <View style={styles.View8} key={index.id}>
-                                                <Text style={{
-                                                    color: item.color, fontSize: 14, paddingHorizontal: 15
-                                                }}>{item.name}:</Text>
-
-                                                <View style={{ alignItems: 'flex-end', }} >
-                                                    <Text style={styles.Text7}>{item.allOfferCount}</Text>
-                                                </View>
-                                            </View>
-                                        </>
-                                    ))}
-
-                                </View>
-
-                            </Card>
-                       
-                            </View>
-                        <View style={{ marginVertical: 20 }}>
-
-                            <Card style={{ width: 370 }}>
-                                <View style={{
-                                    alignItems: 'center',
-                                    marginTop: 20
-                                }}>
-                                    <Text style={{ color: 'black', padding: 5, fontSize: 20 }}>Offer Amount Details</Text>
-                                </View>
-                                <View style={{ alignItems: 'flex-end', marginTop: 5, marginRight: 5 }}>
-                                    <RadioForm
-                                        radio_props={radioProps}
-                                        formHorizontal={true}
-                                        labelHorizontal={false}
-                                        buttonColor={'#2196f3'}
-                                        onPress={(value) => setChartA(value)}
-                                    />
-                                </View>
-
-                                <View style={styles.View10}>
-                                    {chartA === 0
-                                        ?
-                                        <VictoryChart
-                                            height={250}
-                                            width={350}
-                                            theme={VictoryTheme.material}
-                                         domainPadding={{ x: 20 }}
-                                             
-                                            animate={{
-                                                onLoad: { duration: 500 },
-                                                duration: 500,
-                                                easing: "bounce"
-                                            }}
-                                        >
-                                            <VictoryBar
-                                                data={pieAData}
-                                                x='name'
-                                                y='totalOfferedAmount'
-                                                style={{
-                                                    data: {
-                                                        fill: ({ datum}) => 
-                                                        datum.name ==='Settled' ? 'red':
-                                                        datum.name === 'Offered' ? 'blue':                                               
-                                                        datum.name === 'Accepted'  ? '#92CDE2'
-                                                        : 'green',
-                                                        
-                                                        fillOpacity: 0.7,
-                                                        strokeWidth: 3
-                                                    },
-                                                    labels: {
-                                                        fontSize: 15,
-                                                        fill: ({datum}) => datum.x ===  'Settled' ? 'red': 
-                                                        datum.x === 'Accepted'  ? 'green':
+                                                fill: ({ datum }) => datum.x === 'Settled' ? 'red' :
+                                                    datum.x === 'Accepted' ? 'green' :
                                                         datum.x === 'Offered' ? 'violet'
-                                                        : 'blue'
-                                                    }
-                                                  }}
-                                                  labels = {({ datum }) => datum.x}
+                                                            : 'blue'
+                                            }
+                                        }}
+                                        labels={({ datum }) => datum.x} />
+                                    {/* <VictoryAxis/> */}
+                                    {victoryAmount.map((d, i) => {
+                                        return (
+                                            <VictoryAxis dependentAxis
+                                                key={i}
+                                                label={d}
+                                                style={{ tickLabels: { fill: 'none' } }}
+                                                axisValue={d}
                                             />
-                                            <VictoryAxis/>
-                                            {victoryAmount.map((d, i ) => {
-                                                return (
-                                                    <VictoryAxis dependentAxis
-                                                    key={i}
-                                                    label={d}
-                                                    style={{tickLabels: {fill: 'none'}}}
-                                                    axisValue= {d}
-                                                    />
-                                                )
-                                            })}
-                                        </VictoryChart>
-                                        : null
-                                    }
-                                    {chartA === 1
-                                        ? <VictoryPie
-                                            width={300} // Adjust the width of the pie chart
-                                            height={300}
-                                            innerRadius={0} // Adjust the inner radius to make the pie smaller
-                                            labelRadius={60} // Adjust the distance of the labels from the center of the pie
-                                            padding={50}
-                                            colorScale={sliceColor1}
-                                            data={pieAmount} x='name'
-                                            y='totalOfferedAmount' />
-                                        : null
-                                    }
-                                    {chartA === 2
-                                        ? <VictoryChart>
-                                            <VictoryLine
-                                            data={pieAmount}/>
-                                        </VictoryChart>
-                                        : null
-                                    }
+                                        )
+                                    })}
+                                </VictoryChart>
+                                : null
+                            }
+                            {chartA === 1
+                                ? <VictoryPie
+                                    width={300} // Adjust the width of the pie chart
+                                    height={300}
+                                    innerRadius={0} // Adjust the inner radius to make the pie smaller
+                                    labelRadius={60} // Adjust the distance of the labels from the center of the pie
+                                    padding={50}
+                                    labels={({ datum }) => (datum.y === 0 ? "" : datum.x)}
+                                    colorScale={sliceColor1}
+                                    data={pieAmount} x='name'
+                                    y='totalOfferedAmount' />
+                                : null
+                            }
+                            {chartA === 2
+                                ? <VictoryChart>
+                                    <VictoryLine
+                                        data={pieAmount} />
+                                </VictoryChart>
+                                : null
+                            }
 
+                        </View>
+
+                        {pieAData.map((item, index1) => {
+                            return (
+                                <View style={styles.View8} key={index1}>
+                                    <Text style={{ flexDirection: 'column', color: item.color, fontSize: 15, paddingHorizontal: 15 }}>{item.name}:</Text>
+                                    <View style={{ alignItems: 'flex-end', }}>
+                                        <Text style={styles.Text7}>{item.totalOfferedAmount}</Text>
+                                    </View>
+                                    <View>
+
+                                    </View>
                                 </View>
 
-                                {pieAData.map((item, index1) =>
-                                    <View style={styles.View8} key={index1.id}>
-                                        <Text style={{ flexDirection: 'column', color: item.color, fontSize: 15 }}>{item.name}:</Text>
-                                        <View style={{ alignItems: 'flex-end', }} key={index1}>
-                                            <Text style={styles.Text7}>{item.totalOfferedAmount}</Text>
-                                        </View>
-                                        <View >
-                                        </View>
-                                    </View>
-                                )}
-                            </Card>
-                        </View>
-                  
+                            )
+                        }
 
-                    <View style={styles.footer} >
+                        )}
+                    </Card>
+                </View>
 
-                        <Text style={{
-                            color: 'black', textAlign: 'center', fontWeight: 'bold',
-                            fontFamily: 'Georgia',
-                            backgroundColor: "white",
-                            paddingHorizontal: 35,
-                            paddingVertical: 8
 
-                        }}>Copyright @ 2021-2022<Text style={{ color: 'blue' }}>UpCap.</Text>All right Reserved.</Text>
+                <View style={styles.footer} >
 
-                    </View>
-               
-             </ScrollView>
+                    <Text style={{
+                        color: 'black', textAlign: 'center', fontWeight: 'bold',
+                        fontFamily: 'Georgia',
+                        backgroundColor: "white",
+                        paddingHorizontal: 35,
+                        paddingVertical: 8
 
-                  <View style={styles.footer1}>
+                    }}>Copyright @ 2021-2022<Text style={{ color: 'blue' }}>UpCap.</Text>All right Reserved.</Text>
+
+                </View>
+
+            </ScrollView>
+
+            <View style={styles.footer1}>
                 <View style={{ flex: 0.9 }}>
                     <Animated.View style={{ opacity: fadeAnim }}>
                         <TouchableOpacity style={{
                             backgroundColor: 'powderblue',
-                            borderBottomRightRadius: 30, borderTopRightRadius: 30,padding: 10,
+                            borderBottomRightRadius: 30, borderTopRightRadius: 30, padding: 10,
                         }} onPress={() => navigation.navigate('NewInvoice')}>
-                            <Text style={{ textAlign: 'center',  color: 'black', fontSize: 20 }}>Invest</Text>
+                            <Text style={{ textAlign: 'center', color: 'black', fontSize: 20 }}>Invest</Text>
                         </TouchableOpacity>
                     </Animated.View>
                 </View>
                 <View style={{ flex: 1, backgroundColor: 'orange', borderRadius: 30, }}>
                     <TouchableOpacity onPress={fadeIn}>
                         <Text style={{
-                            textAlign: 'center', paddingTop: 10,
+                            textAlign: 'center', paddingTop: 5,
                             fontSize: 25
                         }}>Home</Text>
                     </TouchableOpacity>
@@ -570,7 +830,7 @@ const NewHome = ({ navigation }) => {
                     <Animated.View style={{ opacity: fadeAnim }}>
                         <TouchableOpacity style={{
                             backgroundColor: 'powderblue',
-                            borderBottomLeftRadius: 30, borderTopLeftRadius: 30,padding: 10,
+                            borderBottomLeftRadius: 30, borderTopLeftRadius: 30, padding: 10,
                         }} onPress={() => navigation.navigate('NewReport')}>
                             <Text style={{ textAlign: 'center', color: 'black', fontSize: 20 }}> Report</Text>
 
@@ -578,7 +838,7 @@ const NewHome = ({ navigation }) => {
                     </Animated.View>
                 </View>
 
-               </View>
+            </View>
 
 
         </>
@@ -588,8 +848,7 @@ const NewHome = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 0.0,
-         backgroundColor: '#5B5FB6',
-        // backgroundColor: '#05375a',
+        backgroundColor: '#5B5FB6',
         marginTop: 0,
         borderTopColor: 'white',
         borderTopWidth: 1
@@ -597,10 +856,7 @@ const styles = StyleSheet.create({
     headers: {
         flex: 0.8,
         alignItems: 'center',
-        // backgroundColor: '#C5C9C9',
         marginVertical: 15,
-        // borderColor: 'black',
-        // borderWidth: 1
     },
     footer: {
         alignItems: 'center',
@@ -609,7 +865,6 @@ const styles = StyleSheet.create({
     footer1: {
         flex: 0,
         flexDirection: 'row',
-        
     },
 
 
@@ -634,7 +889,6 @@ const styles = StyleSheet.create({
     View10: {
         alignItems: 'center', justifyContent: 'center',
 
-
     },
     TextCount: {
         textAlign: 'center', fontSize: 15,
@@ -643,9 +897,39 @@ const styles = StyleSheet.create({
     },
     Text7: {
         paddingRight: 15, color: 'black',
-
         position: 'absolute',
         bottom: 0
+
+    },
+    centeredView: {
+        flex: 3,
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: 40,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+    },
+    modalView: {
+        backgroundColor: 'white',
+        borderRadius: 20,
+        padding: 20,
+        width: 350,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 50,
+            height: 40,
+            shadowOpacity: 0.25,
+            shadowRadius: 4,
+            elevation: 5,
+        },
+    },
+    textInput: {
+        height: 40,
+        width: '100%',
+        margin: 10,
+        backgroundColor: 'white',
+        borderColor: 'gray',
+        borderWidth: StyleSheet.hairlineWidth,
+        borderRadius: 10,
     },
 
 })

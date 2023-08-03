@@ -3,39 +3,46 @@ import React, { useContext, useEffect, useState } from 'react'
 import { StyleSheet } from 'react-native'
 import { COLORS, FONTWIEGHT, SIZES } from '../../constants/theme'
 import { AuthContext } from '../../context/AuthContext'
-import { ScrollView } from 'react-native'
 import Spinner from 'react-native-loading-spinner-overlay'
 import { BASE_URL } from '../../constants/Config'
 import * as Progress from 'react-native-progress';
 import Icon from 'react-native-vector-icons/Feather'
+import Icon1 from 'react-native-vector-icons/MaterialIcons'
 import axios from 'axios'
+import { useRoute } from '@react-navigation/native'
+import ModalInvoice from './ModalInvoice'
+import { DigioRNComponent } from 'react-native-digio-sdk'
 
 export default function NewInvoice({ navigation }) {
 
     const [modal, setModal] = useState(false)
-    const [investor_funding_value, setInvestor_funding_value] = useState({})
+
     const [invoice, setInvoice] = useState([])
     const [invoiceWallet, setInvoiceWallet] = useState('')
-    const { userInfo, Invoice } = useContext(AuthContext);
+    const { userInfo } = useContext(AuthContext);
     const [loading, setLoading] = React.useState(false);
-    const [userEmail, setUserEmail] = useState('');
+    const [investor_funding_value, setInvestor_funding_value] = useState('')
+    const [invoiceID, setInvoiceId] = useState(null);
+
+    // console.log("Ïnvoice Id =",invoiceID );
 
     const token = userInfo.data?.accessToken
     // console.log(token)
-    var myHeaders = new Headers();
-    myHeaders.append("Authorization", token);
-
-    var raw = "";
-
-    var requestOptions = {
-        method: 'GET',
-        headers: myHeaders,
-        body: raw,
-        redirect: 'follow'
-    };
+   
 
     const getData = () => {
         setLoading(true)
+        var myHeaders = new Headers();
+        myHeaders.append("Authorization", token);
+    
+        var raw = "";
+    
+        var requestOptions = {
+            method: 'GET',
+            headers: myHeaders,
+            body: raw,
+            redirect: 'follow'
+        };
         fetch(`${BASE_URL}/invoicediscounting/invoice`, requestOptions)
             .then(function (response) {
                 return response.json();
@@ -48,6 +55,9 @@ export default function NewInvoice({ navigation }) {
                 }
                 else { 
                     let data= cont.map((item)=>{
+
+                        let invoiceId = item?._invoiceID     
+                        console.log('cldkjfldkjfdlfjdlfjdklfj', invoiceId)                   
                         let newVal=item?.fundingGoal-item?.UnfundedValue;
                         let newVal1 = Math.round(newVal)
                          let newVal2 = (newVal /100000) 
@@ -62,7 +72,8 @@ export default function NewInvoice({ navigation }) {
                             resultValue:newVal,
                             resultValue1:newVal2,
                             resultValuePer: finalper,
-                            resultValueProgress: progressBar
+                            resultValueProgress: progressBar,
+                            resultValueInvoiceId: invoiceId
 
                         }
                     })
@@ -83,23 +94,19 @@ export default function NewInvoice({ navigation }) {
 
 
 
-
-    const handlePostAPI=()=>{
-        let payload={
-            "invoiceID": "1",
-            "investor_funding_value" : "15000.00"
-        }
-         axios.post("http://192.168.5.59:9080/invoicediscounting/addfunding",
-         myHeaders,payload)
-         .then((res)=>{
-            console.log("Responsee= ",res.data);
-         }).catch((err)=>{
-            console.log(err);
-         })
-    }
-
     const getData1 = () => {
         setLoading(true)
+        var myHeaders = new Headers();
+        myHeaders.append("Authorization", token);
+    
+        var raw = "";
+    
+        var requestOptions = {
+            method: 'GET',
+            headers: myHeaders,
+            body: raw,
+            redirect: 'follow'
+        };
         fetch(`${BASE_URL}/wallet/wallet-balance`, requestOptions)
             .then(function (response) {
                 return response.json();
@@ -119,31 +126,64 @@ export default function NewInvoice({ navigation }) {
         getData1()
     }, [])
 
+    const InvoiceFund = async () => {
+        const token1 = userInfo.data?.accessToken;
+        // console.log(token1)
+        const raw = JSON.stringify({
+            "invoiceID":invoiceID ,
+            "investor_funding_value": investor_funding_value
+        })
+      console.log('cehckckfkhlk', invoiceID)
+    
+   
+    const requestOptions1 = {
+        method: 'POST',
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',  // I added this line
+            "Authorization": token1
+        },
+        body: raw,
+    }
+        fetch(`${BASE_URL}/invoicediscounting/addfunding`, requestOptions1)
+            .then(response => response.json())
+            .then((result) =>   
+            // console.log(result)    
+          
+                  { 
+                    let results = result
+                    console.log('check...........',results)
+             if  ( results?.code === 200 )
+             {
+                Alert.alert('OK')
+                navigation.navigate('ModalInvoice')
+              
+             }
+             else if(result?.code ===600){
+                Alert.alert('Minimum funding amount should be INR 0"')
+
+             }
+             else if(result?.code ===500){
+                Alert.alert('Minimum funding amount should be INR 0"')
+
+             }  else{
+                Alert.alert('Fill not be blaank')                   
+                console.log(result)
+
+                  }     
+                                     
+                }                    
+                 )         
+            .catch(error => console.log('error', error));    
+            }        
+ 
+
 
     // Making for progrss and Calculate in percentage
 
      const wallet = invoiceWallet
      const fundingGoal = invoice[0]?.fundingGoal
-
-    // const Unfunded = invoice[0]?.UnfundedValue
-    // console.log('check Goal', fundGoal)
-    // console.log(UnfundGoal)
-
-    // const fundingGoal = invoice.m
-
-    // const x = fundingGoal - Unfunded
-
-    // const inPerRemain = x / 100000
     const inPerUnfun = fundingGoal / 100000
-
-    // const percentage = (inPerRemain / inPerUnfun) * 100
-
-    // const finalper = Math.round(percentage)
-    // // { percentage = x.y }
-    // const progressBar = finalper / 100
-
-
-    // Making the param props id
 
     const handleItemPress = (item) => {
         navigation.navigate('InvoiceDetails', { item });
@@ -152,24 +192,29 @@ export default function NewInvoice({ navigation }) {
     return (
 
         <>
-        <View style={{flex: 0.1, flexDirection:'row', justifyContent: 'flex-start', backgroundColor:'#5B5FB6'}}>
+        <View style={{flex: 0.1, flexDirection:'row', justifyContent: 'space-between', backgroundColor:'#5B5FB6'}}>
        <TouchableOpacity onPress={() => navigation.navigate('NewHome')}>
        <Icon name="home"
               size={30}
               color='white' style={{padding: 15}} />
        </TouchableOpacity>
         <Text style={{fontSize:30,color:'white', paddingTop: 5, textAlign:'center',paddingHorizontal: 80}}>Invoice</Text>
+        <TouchableOpacity onPress={() => navigation.navigate('WalletReport')}>
+       <Icon1 name="report"
+              size={30}
+              color='white' style={{padding: 15}} />
+       </TouchableOpacity>
         </View>
             <View style={{ flex: 1, backgroundColor: '#fff' }}>
 
                 <Spinner visible={loading} />
 
                 <FlatList
-                    keyExtractor={(item) => item.id}
+                    keyExtractor={(item) => item._invoiceID}
                     data={invoice}
                     renderItem={({ item, index }) => {
                         return (
-                            <View style={{ margin: 10, marginVertical: 20 }} key={index.id}>
+                            <View style={{ margin: 10, marginVertical: 20 }} key={index}>
                                 {/* <Image
                                     source={require('../../../assets/roseBackground.jpg')}
                                     style={StyleSheet.absoluteFillObject}
@@ -189,20 +234,20 @@ export default function NewInvoice({ navigation }) {
                                 }} >
 
                                     <Text style={styles.bol}>{item.discountRate} </Text>
-                                    {/* <Text style={styles.bol}>70%</Text> */}
+                                   
                                     <Text style={{ color: 'black', paddingBottom: 5 }}>NET ANNUAL YIELD</Text>
                                     <Text style={styles.bol}> {item.invoiceTenure} D</Text>
-                                    {/* <Text style={styles.bol}> 2 D</Text> */}
+                                   
 
                                     <Text style={{ color: 'black', paddingBottom: 5 }}> TENURE</Text>
 
 
                                     <Text style={styles.bol}>INR  {item.fundingGoal}</Text>
-                                    {/* <Text style={styles.bol}> INR: 3894787</Text> */}
+                                   
 
                                     <Text style={{ color: 'black', paddingBottom: 5 }}>FUDING GOAL</Text>
                                     <Text style={styles.bol}>INR {item.UnfundedValue}</Text>
-                                    {/* <Text style={styles.bol}>INR: 7868789</Text> */}
+                                   
 
                                     <Text style={{ color: 'black', paddingBottom: 5 }}> UNFUNDED VALUE</Text>
                                     <View>
@@ -215,9 +260,7 @@ export default function NewInvoice({ navigation }) {
                                         </View>
                                         <Progress.Bar progress={item?.resultValueProgress} width={340} />
 
-                                        <View>
-
-                                        </View>
+                            
 
                                     </View>
 
@@ -238,7 +281,10 @@ export default function NewInvoice({ navigation }) {
                                         </TouchableOpacity>
 
 
-                                        <TouchableOpacity onPress={() => setModal(true)} >
+                                        <TouchableOpacity onPress={() =>{
+                                             setModal(true);
+                                             setInvoiceId(invoiceID)
+                                        }} >
                                             <Text style={styles.text3} >
                                                 Fund
                                             </Text>
@@ -272,7 +318,7 @@ export default function NewInvoice({ navigation }) {
 
 
                             <Text style={{ color: 'black', paddingBottom: 10, fontSize: 20, fontFamily: 'serif' }}>Wallet Net Balance:{wallet} </Text>
-                            <View>
+                           
 
 
                                 <View >
@@ -282,13 +328,16 @@ export default function NewInvoice({ navigation }) {
                                         <Text style={{ color: 'black', fontWeight: 'bold', fontSize: 16, fontFamily: 'system-ui' }}>Enter Funding Amount:</Text>
                                         <TextInput style={styles.input} type='number'
                                             placeholder='Enter the Number '
+                                           
+                                            value={investor_funding_value}
+                                            onChangeText={text => setInvestor_funding_value(text)}
                                             />
                                     </View>
                                     <View style={styles.touch}>
-                                        <TouchableOpacity>
+                                        <TouchableOpacity  >
 
-                                            <Pressable
-                                                onPress={handlePostAPI}>
+                                            <Pressable onPress={InvoiceFund}
+                                                >
                                                 <Text style={styles.textStyle}>Add Funding</Text>
                                             </Pressable>
                                         </TouchableOpacity>
@@ -300,8 +349,7 @@ export default function NewInvoice({ navigation }) {
                                         </TouchableOpacity>
 
                                     </View>
-                                </View>
-                            </View>
+                                </View>                          
 
                         </View>
                     </View>

@@ -28,6 +28,13 @@ const NewTds = () => {
   const [sortingOption, setSortingOption] = useState('default');
   const [pdfFilePath, setPdfFilePath] = useState('');
 
+  const [products, setProducts] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPageNew, setCurrentPageNew] = useState(1);
+  const [productsPerPage] = useState(4);
+  const [sortOrder, setSortOrder] = useState('asc');
+
+
 
 
 
@@ -44,6 +51,12 @@ const NewTds = () => {
     }
     setTdsData(tdsData);
   };
+
+  const handleSort = () => {
+    setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+  };
+
+  //--------------------------------x--------------
 
   const { userInfo } = useContext(AuthContext);
   // console.log(userInfo)
@@ -64,12 +77,12 @@ const NewTds = () => {
     fetch(`${BASE_URL}/transaction/investor-tds-transaction`, requestOptions)
       .then(function (response) {
         return response.json()
-      
+
       }).
       then(function (myJson) {
         let result = myJson
         setTds(result)
-        setLaoding(false)  
+        setLaoding(false)
 
       })
       .catch(function (error) {
@@ -95,10 +108,10 @@ const NewTds = () => {
       }).
       then(function (myJson) {
         let result1 = myJson?.data
-        // console.log('check transaction....', result1)
+         console.log('check transaction....', result1)
         setTdsData(result1)
         setLaoding(false)
-        
+
 
       })
       .catch(function (error) {
@@ -113,12 +126,23 @@ const NewTds = () => {
 
   //----------------------Search---------------------
 
-
+  const handleSearch = (text) => {
+    setSearchQuery(text);
+    setCurrentPage(1);
+  };
 
 
 
 
   // --------------------Pagination-----------------------------
+
+  // const indexOfLastProduct = currentPage * productsPerPage;
+  // const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+  // const currentData = tdsData.slice(indexOfFirstProduct, indexOfLastProduct);
+
+  // const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  //-----------------
 
 
   const totalItems = tdsData?.length; // Replace `data` with your actual data array
@@ -137,69 +161,20 @@ const NewTds = () => {
   };
 
   const startIndex = (currentPage - 1) * itemsPerPage;
-const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
-
-const tableData = tdsData?.slice(startIndex, endIndex);
-
-const filteredData = tableData?.filter(item => item.counterParty.includes(searchQuery)) 
-
-  data = [{
-    "invoiceRefID": "INVOICE1",
-    "counterParty": "FUNDED",
-    "transactionAmount": "40350.00",
-    "transactionDate": "04-04-2023"
-  },
-  {
-    "invoiceRefID": "INVOICE2",
-    "counterParty": "UNFUNDED ",
-    "transactionAmount": "30350.00",
-    "transactionDate": "06-04-2023"
-  },
-  {
-    "invoiceRefID": "INVOICE3",
-    "counterParty": "FUNDED ",
-    "transactionAmount": "50350.00",
-    "transactionDate": "03-04-2023"
-  },
-  {
-    "invoiceRefID": "INVOICE4",
-    "counterParty": "FUNDED",
-    "transactionAmount": "40350.00",
-    "transactionDate": "07-04-2023"
-  },
-  {
-    "invoiceRefID": "INVOICE5",
-    "counterParty": "FUNDED ",
-    "transactionAmount": "40350.00",
-    "transactionDate": "02-04-2023"
-  },
-  {
-    "invoiceRefID": "INVOICE6",
-    "counterParty": "FUNDED ",
-    "transactionAmount": "70350.00",
-    "transactionDate": "08-04-2023"
-  },
-  {
-    "invoiceRefID": "INVOICE6",
-    "counterParty": "FUNDED ",
-    "transactionAmount": "70350.00",
-    "transactionDate": "08-04-2023"
-  },
-  {
-    "invoiceRefID": "INVOICE6",
-    "counterParty": "FUNDED ",
-    "transactionAmount": "70350.00",
-    "transactionDate": "08-04-2023"
-  },
-  {
-    "invoiceRefID": "INVOICE6",
-    "counterParty": "FUNDED ",
-    "transactionAmount": "70350.00",
-    "transactionDate": "08-04-2023"
-  },
+  const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
 
 
-  ]
+  //const filterData = data?.filter((item) => item.counterParty.toLowerCase().includes(searchQuery.toLowerCase())) 
+
+  let tableData = tdsData?.slice(startIndex, endIndex);
+
+  const filterData = tableData?.filter((item) => item.counterParty.toLowerCase().includes(searchQuery.toLowerCase()))
+  console.log(filterData)
+
+
+
+
+
 
   //------------------------For PDF
 
@@ -219,8 +194,8 @@ const filteredData = tableData?.filter(item => item.counterParty.includes(search
             </thead>
             <tbody>
               ${tdsData
-                .map(
-                  (row) => `
+        .map(
+          (row) => `
                   <tr>
                     <td>${row.invoiceRefID}</td>
                     <td>${row.counterParty}</td>
@@ -228,8 +203,8 @@ const filteredData = tableData?.filter(item => item.counterParty.includes(search
                     <td>${row.transactionDate}</td>
                   </tr>
                 `
-                )
-                .join('')}
+        )
+        .join('')}
             </tbody>
           </table>
         </body>
@@ -271,14 +246,19 @@ const filteredData = tableData?.filter(item => item.counterParty.includes(search
   return (
 
     <>
+      <ScrollView>
 
-<TextInput
+      <TextInput style={{ borderWidth: 1, borderColor: 'black', marginTop: 10, marginHorizontal: 10 }}
         placeholder="Search"
         value={searchQuery}
-        onChangeText={text => setSearchQuery(text)}
+        autoFocus={true}
+        onChangeText={(text) => setSearchQuery(text)
+        }
+
+      // onChange={handleSearch}
       />
 
-<Picker
+      <Picker
         selectedValue={sortingOption}
         onValueChange={(itemValue) => {
           setSortingOption(itemValue);
@@ -290,75 +270,97 @@ const filteredData = tableData?.filter(item => item.counterParty.includes(search
         <Picker.Item label="High to Low Amount" value="option2" />
         {/* Add more sorting options as needed */}
       </Picker>
-      <View style={styles.container}>
-        <Text style={{ fontSize: SIZES.h1, padding: 7, textAlign: 'center', color: 'black' }}> TDS Transactions</Text>
- 
+      <View style={{ alignItems: 'center', padding: 10, 
+      backgroundColor:'#5B5FB6' }}>
+        <Text style={{ fontSize: SIZES.h2, textAlign: 'center' }}> TDS Transactions</Text>
+
       </View>
 
-      <View style={styles.header}>   
-
-        <ScrollView>
-          {tds?.code === 500 ? Alert.alert('There is no TDS record right now') : (
-            <>
-              <View style={styles.tableRow}>
-                <Text  style={styles.tableHeader}>REFID</Text>
-                <Text  style={styles.tableHeader}>COUNTER PARTY</Text>
-                <Text  style={styles.tableHeader}>TRANS AMT</Text>
-                <Text  style={styles.tableHeader}>TRANS DATE</Text>
+        {tds?.code === 500 ? Alert.alert('There is no TDS record right now') : (
+          <ScrollView horizontal={true}>
+            <View>
+              <View style={{ flexDirection: 'row' }}>
+                <Text style={styles.tableHeader}>REFID</Text>
+                <Text style={styles.tableHeader}>InvestorName</Text>
+                <Text style={styles.tableHeader}>Unique InvoiceID</Text>
+                <Text style={styles.tableHeader}>COUNTER PARTY</Text>
+                <Text style={styles.tableHeader}>TRANSFER AMT</Text>
+                <Text style={styles.tableHeader}>TRANSFER DATE</Text>
+                <Text style={styles.tableHeader}>TRANSFER Status</Text>
+                <Text style={styles.tableHeader}>TRANSFER Request Status</Text>
+                <Text style={styles.tableHeader}>TRANSFER Type</Text>
               </View>
               {/* {tableData?.map((item, index) => */}
-              {filteredData?.map((item, index) =>
+
+              {/* {currentData.filter((item) => item.counterParty.toLowerCase().includes(searchQuery.toLowerCase())
+              ).sort((a,b)=> (sortOrder ==='asc' ? a.transactionAmount.localeCompare(b.name) : b.transactionAmount.localeCompare(a.transactionAmount)))
+              .map((item) => ( */}
+              {filterData?.map((item, index) =>
                 <>
-                  
-                    <View style={styles.tableRow}>
-                      
 
-                        <Text style={styles.tableCell}>{item.invoiceRefID}</Text>
+                  <View style={{ flexDirection: 'row' }} key={index}>
+
+                    <Text style={styles.tableCell}>{item.invoiceRefID}</Text>
+                    <Text style={styles.tableCell}>{item.investorName}</Text>
+                    <Text style={styles.tableCell}>{item.uniqueInvoiceID}</Text>
+                    <Text style={styles.tableCell}>{item.counterParty}</Text>
+                    <Text style={styles.tableCell}>{item.transactionAmount}</Text>
+                    <Text style={styles.tableCell}>{item.transactionDate}</Text>
+                    <Text style={styles.tableCell}>{item.tranStatus}</Text>
+                    <Text style={styles.tableCell}>{item.transferReqStatus}</Text>
+                    <Text style={styles.tableCell}>{item.transactionType}</Text>
                     
-                     
-                        <Text style={styles.tableCell}>{item.counterParty}</Text>
-                          
-                         <Text style={styles.tableCell}>{item.transactionAmount}</Text>
-                       
-            
-                        <Text style={styles.tableCell}>{item.transactionDate}</Text>
-                        
-                   
 
-                    </View>
+
+
+                  </View>
                 </>
+
               )}
 
-            </>
-          )
-          }
+            </View>
+          </ScrollView>
+        )
+        }
+        <View style={{
+          flexDirection: 'row', justifyContent: 'flex-end', marginHorizontal: 10,
+          paddingRight: 10
+        }}>
           <View style={{
-            flexDirection: 'row', justifyContent: 'flex-end', marginHorizontal: 10,
-            paddingRight: 10
+            flexDirection: 'row', justifyContent: 'flex-end',
+            padding: 5
           }}>
-            <View style={{flexDirection: 'row', justifyContent: 'flex-end', 
-          padding: 5}}>
-      <Button onPress={handlePrevPage} disabled={currentPage === 1} title='prev'/>
-      <Text style={{paddingTop: 7, paddingHorizontal: 4}}>Page {currentPage} of {totalPages}</Text>
-      <Button onPress={handleNextPage} disabled={currentPage === totalPages} title='Next'/>
-    </View>
+            {/* <Button title='first' onPress={()=> paginate(1)}/>
+            <Button title='prev' onPress={() => paginate(currentPage - 1)}
+          disabled={currentPage === 1}/>
+          <Button title='Last' onPress={() => paginate(currentPage + 1)}
+          disabled={indexOfLastProduct >= products.length}/>
+          <Button title='Next' onPress={() => paginate(Math.ceil(products.length / productsPerPage))}/> */}
+            <Button onPress={handlePrevPage} disabled={currentPage === 1} title='prev' />
+            <Text style={{ paddingTop: 7, paddingHorizontal: 4 }}>Page {currentPage} of {totalPages}</Text>
+            <Button onPress={handleNextPage} disabled={currentPage === totalPages} title='Next' />
           </View>
+        </View>
 
 
-        </ScrollView>
-      </View>
+
+   
       <Spinner visible={loading} />
 
       <View>
-<Button title="Generate PDF" onPress={generatePDF} />
-      {pdfFilePath !== '' && (
-        <Button title="Download PDF" onPress={downloadPDF} />
-      )}
-</View>
+        <Button title="Generate PDF" onPress={generatePDF} />
+        {pdfFilePath !== '' && (
+          <Button title="Download PDF" onPress={downloadPDF} />
+        )}
+      </View>
       <View style={styles.footer} >
-        <Text style={{ color: 'black', textAlign: 'center', fontWeight: 'bold', paddingTop: 10, fontFamily: 'Georgia' }}>Copyright @ 2021-2022<Text style={{ color: 'blue' }}>UpCap.</Text>All right Reserved.</Text>
+        <Text style={{ color: 'black', textAlign: 'center', 
+        fontWeight: 'bold', paddingTop: 10, fontFamily: 'Georgia' }}>
+          Copyright @ 2021-2022<Text style={{ color: 'blue' }}>UpCap.
+          </Text>All right Reserved.</Text>
 
       </View>
+    </ScrollView>
     </>
 
   )
@@ -372,8 +374,6 @@ const styles = StyleSheet.create({
   },
   header: {
     flex: 1.8,
-  
-
     backgroundColor: 'white',
     borderWidth: 1,
     borderColor: 'black'
@@ -385,6 +385,7 @@ const styles = StyleSheet.create({
   tableHeader: {
     flex: 1,
     padding: 5,
+    width: 85,
     fontWeight: 'bold',
     borderWidth: 1,
     borderColor: '#000',
@@ -392,8 +393,7 @@ const styles = StyleSheet.create({
   tableCell: {
     flex: 1,
     padding: 5,
-    paddingHorizontal: 10,
-  
+    width: 15,
     borderWidth: 1,
     borderColor: '#000',
   },

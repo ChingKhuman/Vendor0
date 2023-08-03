@@ -6,6 +6,7 @@ import { Alert } from "react-native";
 
 
 
+
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
@@ -18,22 +19,7 @@ export const AuthProvider = ({ children }) => {
 
 
 
-  const checkPasswordValidity = value => {
-    const isNonWhiteSpace = /^\S*$/;
-    if (!isNonWhiteSpace.test(value)) {
-      return 'Password must not contain Whitespaces.';
-    }
-    const isContainsNumber = /^(?=.*[0-9]).*$/;
-    if (!isContainsNumber.test(value)) {
-      return 'Password must contain at least one Digit.';
-    }
-
-    const isValidLength = /^.{8,16}$/;
-    if (!isValidLength.test(value)) {
-      return 'Password must be 8-16 Characters Long.';
-    }
-    return null;
-  }
+ 
 
 
   // const register = (userFName, userMobile, userEmail, userPasswd,
@@ -78,7 +64,7 @@ export const AuthProvider = ({ children }) => {
   //   })
   //   .catch(error => console.log('error', error));    
   //  } 
-  const login = async (userEmail, userPasswd) => {
+  const login = async (userEmail, userPasswd) => {    
     setLoading(true)
    try {
     axios.post(`${BASE_URL}/account/login`,
@@ -86,7 +72,7 @@ export const AuthProvider = ({ children }) => {
   ).then(res => {
     let userInfo = res.data;
     // console.log("Checkdata...", userInfo)  
-      setUserInfo(userInfo)
+       setUserInfo(userInfo)
       AsyncStorage.setItem('userInfo', JSON.stringify(userInfo))
       setLoading(false)
   })
@@ -99,15 +85,48 @@ export const AuthProvider = ({ children }) => {
    }
 
   }
+
+
+// const login = async (values) => {
+//   let raw = JSON.stringify(values);
+//   var requestOptions1 = {
+//     method: 'POST',
+//     headers: {
+//         Accept: 'application/json',
+//         'Content-Type': 'application/json',  // I added this line        
+//     },
+//     body: raw,
+// }
+//  fetch(`${BASE_URL}/account/login`, requestOptions1)
+//  .then(response => response.text())
+//  .then(result => {
+//   let userInfo = result
+//    setUserInfo(userInfo)
+
+//   console.log('chceckk.....', userInfo)
+//   AsyncStorage.setItem('userInfo', JSON.stringify(userInfo))
+//     setLoading(false)
+//  }
+//   ).catch(error => console.log('error', error));
+    
+// } 
+
+
+
   const logout = async () => {
     try {
       await AsyncStorage.removeItem('userInfo');
       setUserInfo({})
+     
+      Alert.alert('Logged out successfully!');
+      
 
     } catch (error) {
       console.log(`Error removing item: ${error}`);
     }
   };
+
+ 
 
   const isloggedIn = async () => {
     try {
@@ -153,7 +172,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
 
-    <AuthContext.Provider value={{ loading, userInfo, splashLoading, login, logout, Invoice, errorMessage }}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={{ loading, userInfo, splashLoading, login, logout, Invoice, isloggedIn,errorMessage }}>{children}</AuthContext.Provider>
   )
 
 }

@@ -1,5 +1,6 @@
 apply plugin: "com.android.application"
 apply plugin: "com.facebook.react"
+// apply plugin: "com.google.firebase.crashlytics"
 
 import com.android.build.OutputFile
 
@@ -90,14 +91,18 @@ def reactNativeArchitectures() {
 
 android {
     ndkVersion rootProject.ext.ndkVersion
+//
+//    compileSdkVersion rootProject.ext.compileSdkVersion
 
-    compileSdkVersion rootProject.ext.compileSdkVersion
+    compileSdkVersion 33
 
     namespace "com.vendor"
     defaultConfig {
         applicationId "com.vendor"
-        minSdkVersion rootProject.ext.minSdkVersion
-        targetSdkVersion rootProject.ext.targetSdkVersion
+//        minSdkVersion rootProject.ext.minSdkVersion
+//        targetSdkVersion rootProject.ext.targetSdkVersion
+        minSdkVersion 21
+        targetSdkVersion 33
         versionCode 1
         versionName "1.0"
     }
@@ -169,8 +174,21 @@ android {
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
+    //--------------digio---------
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.9.0'
+    implementation "androidx.navigation:navigation-fragment-ktx:2.5.3"
+    implementation "androidx.navigation:navigation-ui-ktx:2.5.3"
+
+    //-------digio crash handling
+    implementation 'com.google.firebase:firebase-common-ktx:20.2.0'
+    implementation 'com.google.firebase:firebase-crashlytics-ktx:18.3.2'
+
+    implementation fileTree(dir: "libs", include: ["*.aar"])
+
 
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.0.0")
+    implementation fileTree(dir: 'C:\\Users\\admin\\Desktop\\digio', include: ['*.aar', '*.jar'], exclude: [])
 
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}")
     debugImplementation("com.facebook.flipper:flipper-network-plugin:${FLIPPER_VERSION}") {
@@ -187,8 +205,12 @@ dependencies {
      implementation project(':react-native-fs')
 }
 
+
+
 task wrapper(type: Wrapper){
     gradleVersion = '7.5.1'
+
+
 }
 
 apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)

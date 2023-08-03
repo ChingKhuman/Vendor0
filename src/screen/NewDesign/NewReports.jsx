@@ -5,6 +5,7 @@ import NewFunding from './NewFunding';
 import NewSettlement from './NewSettlement';
 import NewTds from './NewTds';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import WalletReport from './WalletReport/WalletReport';
 
 
 const Tab = createBottomTabNavigator();
@@ -21,6 +22,9 @@ const screenOptions = ({ route }) => ({
       }
       else if (route.name === 'Tds'){
         iconName = 'check-circle'
+      }
+      else if (route.name === 'WalletReport'){
+        iconName = 'folder-open-o'
       }
   
       return <Icon name={iconName} size={size} color={color} />;
@@ -48,6 +52,7 @@ const CustomTab = () => (
          <Tab.Screen name="Funding" component={NewFunding} options={{ headerShown: false, tabBarStyle: "20%" }} />
          <Tab.Screen name="Settlement" component={NewSettlement} options={{ headerShown: false, tabBarStyle: "20%" }} />
          <Tab.Screen name="Tds" component={NewTds} options={{ headerShown: false, tabBarStyle: "20%" }} />
+         <Tab.Screen name="WalletReport" component={WalletReport} options={{ headerShown: false, tabBarStyle: "20%" }} />
       </Tab.Navigator>
 );
 

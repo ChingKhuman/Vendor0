@@ -3,8 +3,6 @@ import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Button, FlatList,
 import Spinner from "react-native-loading-spinner-overlay/lib";
 import { AuthContext } from '../../context/AuthContext';
 import { BASE_URL } from '../../constants/Config';
-import { COLORS } from '../../constants/theme';
-import { Card } from 'react-native-paper';
 import { StatusBar } from 'react-native';
 import { Animated } from 'react-native';
 import { useRef } from 'react';
@@ -61,58 +59,8 @@ const NewFunding = () => {
         }
     }, [pageCurrent])
 
-    const renderFooter = () => {
-        return (
-            loading ? 
-            <View style={{marginTop:10, alignItems: 'center'}}>
-                <ActivityIndicator size='large'/>
-            </View>: null
-                
-        )
-    }
-
-    const handleLoadMore = () => {
-        setPageCurrent(pageCurrent +1)
-        setLoading(true)
-    }
-    // data = [{
-    //     "fundingRate": "13%",
-    //     "investorFundedAmount": "100000",
-    //     "invoicePaymentDue": "24-4-2023",
-    //     "expectedRepaymentAmount": "Rs 1,03,136.78"
-    // },
-    // {
-    //     "fundingRate": "17%",
-    //     "investorFundedAmount": "200000",
-    //     "invoicePaymentDue": "24-4-2023",
-    //     "expectedRepaymentAmount": "Rs 1,03,136.78"
-    // },
-    // {
-    //     "fundingRate": "13%",
-    //     "investorFundedAmount": "300,000",
-    //     "invoicePaymentDue": "24-4-2023",
-    //     "expectedRepaymentAmount": "Rs 1,03,136.78"
-    // },
-    // {
-    //     "fundingRate": "13%",
-    //     "investorFundedAmount": "4,0889878",
-    //     "invoicePaymentDue": "24-4-2023",
-    //     "expectedRepaymentAmount": "Rs 1,03,136.78"
-    // },
-    // {
-    //     "fundingRate": "13%",
-    //     "investorFundedAmount": "4,0889878",
-    //     "invoicePaymentDue": "24-4-2023",
-    //     "expectedRepaymentAmount": "Rs 1,03,136.78"
-    // },
-    // {
-    //     "fundingRate": "13%",
-    //     "investorFundedAmount": "4,0889878",
-    //     "invoicePaymentDue": "24-4-2023",
-    //     "expectedRepaymentAmount": "Rs 1,03,136.78"
-    // },
-
-    // ]
+  
+  
      const SPACING = 20
      const AVATAR = 70
      const ITEM = AVATAR + SPACING *3
@@ -128,7 +76,7 @@ const NewFunding = () => {
        
 
         <Animated.FlatList
-         keyExtractor={(item, index) => item.id}
+         keyExtractor={(item) => item.id}
         data={fund}
         onScroll={Animated.event(
             [{nativeEvent: {contentOffset:{y:scrollY}}}],
@@ -139,24 +87,14 @@ const NewFunding = () => {
             paddingTop:StatusBar.currentHeight ||42
         }}
         renderItem={({ item, index }) => {
-            const inputRange = [
-                -1,
-                0,
-                ITEM * index,
-                ITEM * (index + 2)
-            ]
-
-            const scale = scrollY.interpolate({
-                inputRange:[1,1,1,1],
-                outputRange:[1,1,1,1]
-            })
+           
           return  (
            <>
 
             <View style={{borderWidth: 1, borderColor:'blue',backgroundColor: '#5B5FB6',
-        height: 70, flexDirection:'row'}}>
+        height: 70, flexDirection:'row'}} key={index}>
             <Image
-            source={require('../../../assets/Logo.png')}
+            source={require('../../../assets/Logo.jpg')}
             style={{width: 80,height: 35 , borderRadius: 100, 
             margin: 5, marginVertical: 15}}/>
             <View>
@@ -173,7 +111,7 @@ const NewFunding = () => {
             },
         shadowOpacity: .3,
     shadowRadius: 20,
-transform: [{scale}]           }}
+          }}
                     >
 
             {/* <Image
@@ -203,90 +141,9 @@ transform: [{scale}]           }}
             </>              
           )     
         }}
-        ListFooterComponent={renderFooter}
-        onEndReached={handleLoadMore}
-        onEndReachedThreshold={0}
-      />
-        
-
        
-            {/* <View style={styles.container}>
-
-                <Text style={{
-                    alignItems: 'center', color: 'black', textAlign: 'center',
-                    fontSize: 30, marginTop: 10
-                }}> FUNDING </Text>
-
-            </View>
-            <View style={styles.headers}>
-                <ScrollView>
-                    <Spinner visible={loading} />
-
-                    {fund?.map((item, index) =>
-
-
-                        <View style={{ marginTop: '10%' }} key={index}>
-                            <Card>
-                                <View style={{
-                                    backgroundColor: COLORS.green,
-                                    alignItems: 'center',
-                                    paddingHorizontal: 20,
-
-                                }} >
-                                    <Text style={{ color: 'white', fontSize: 20, fontFamily: 'serif' }}>INVESTED IN:</Text>
-                                    <Text style={{ color: 'white', fontSize: 20, fontFamily: 'san' }}>Granite America Test_</Text>
-                                </View>
-
-                                <View style={{
-                                    backgroundColor: 'white', borderBottomLeftRadius: 5, borderBottomRightRadius: 5,
-                                    borderColor: 'black', borderWidth: 1
-                                }}>
-                                    <View style={{ alignItems: 'center', paddingVertical: 30 }}>
-                                        <Text style={{ fontFamily: 'sans-serif', fontSize: 18 }}>{item.fundingRate}</Text>
-
-
-                                        <Text style={{ fontFamily: 'serif', fontSize: 13, color: 'black' }}>NET ANNUAL YIELD</Text>
-                                        <Text style={{ fontFamily: 'sans-serif', fontSize: 18, color: 'black' }}>{item.investorFundedAmount}</Text>
-
-                                        <Text style={{ fontFamily: 'serif', fontSize: 13, color: 'black' }}>YOUR INVESTMENT</Text>
-                                    </View>
-                                    <View style={{ alignItems: 'center', paddingVertical: 13 }}>
-                                        <Text style={{ fontFamily: 'sans-serif', fontSize: 18, color: 'black' }}>{item.invoicePaymentDue}</Text>
-
-
-                                        <Text style={{ fontFamily: 'serif', fontSize: 13, color: 'black' }}>EXPECTED REPAYMENT DATE</Text>
-                                        <Text style={{ fontFamily: 'sans-serif', fontSize: 18, color: 'black' }}>{item.expectedRepaymentAmount}</Text>
-
-                                        <Text style={{ fontFamily: 'serif', fontSize: 13, color: 'black' }}>EXPECTED REPAYMENT AMOUNT</Text>
-                                    </View>
-                                    <View style={{ alignItems: 'center' }}>
-                                        <TouchableOpacity style={{ borderTopWidth: 1, borderBottomWidth: 1, borderColor: COLORS.green, width: 320, height: 50, alignItems: 'center' }}
-                                        >
-                                            <Text style={{ position: 'relative', color: COLORS.green, paddingTop: 10, fontFamily: 'serif', fontSize: 20 }} >
-                                                Invoice Details
-                                            </Text>
-                                        </TouchableOpacity>
-                                    </View>
-                                </View>
-                            </Card>
-
-                        </View>
-                    )}
-
-                    <View style={styles.footer}>
-                        <Text style={{ color: 'black', textAlign: 'center', fontWeight: 'bold', paddingTop: 10, fontFamily: 'Georgia' }}>Copyright @ 2021-2022<Text style={{ color: 'blue' }}>UpCap.</Text>All right Reserved.</Text>
-
-                    </View>
-                </ScrollView>
-
-
-            </View> */}
-
-
-
-
-
-        </View>
+      />
+                </View>
 
     )
 }
