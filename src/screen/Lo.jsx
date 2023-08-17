@@ -31,17 +31,25 @@ const Lo = ({ navigation }) => {
           style={styles.logo}
           resizeMode="stretch" /> */}
            <Image
-            source={require('../../assets/Logo.jpg')}
-            style={{width: 300,height: 105 , borderRadius: 100, 
+            source={require('../../assets/logo1.jpg')}
+            style={{width: 300,height: 150 , borderRadius: 0, 
             margin: 5, marginVertical: 15}}/>
+            <Text style={{color:293462, fontSize:20}}>An Alternative Investment Platform</Text>
       </View>
 
       <Animatable.View style={styles.footer}
         animation='fadeInUpBig'>
         <Text style={styles.title}>
-          Stay Connect With Our Opportunity
+          A Finsight Venture       Platform
         </Text>
-        <Text style={styles.text}> Sign in With Account</Text>
+{/*         
+        <Text style={styles.text}> Platform</Text> */}
+        {/* <View style={{borderRadius: 50}}>
+        <Image 
+            source={require('../../assets/logo2.jpg')}
+            style={{width: 80,height: 80 , borderRadius: 0, 
+            margin: 5, marginVertical: 15}}/>
+        </View> */}
 
 
         <View style={styles.button}>
@@ -67,7 +75,7 @@ const height_logo = height * 0.5 * 0.4
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#05375a'
+    backgroundColor: 'white'
   },
   header: {
     flex: 2,
@@ -76,7 +84,7 @@ const styles = StyleSheet.create({
   },
   footer: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: '#7dce13',
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
     paddingVertical: 50,
@@ -89,9 +97,10 @@ const styles = StyleSheet.create({
 
   },
   title: {
-    color: '#05375a',
-    fontWeight: 'bold',
-    fontSize: 30
+    color: 293462,
+    // fontWeight: 'bold',
+    fontSize: 30,
+    fontFamily:'Calibri-bold '
   },
   button: {
     alignItems: 'flex-end',
@@ -100,7 +109,8 @@ const styles = StyleSheet.create({
   text: {
     color: 'grey',
     marginTop: 30,
-    fontWeight: 'bold'
+    // fontWeight: 'bold',
+    fontFamily:'Calibri-bold'
   },
   singIn: {
     width: 150,
@@ -112,7 +122,7 @@ const styles = StyleSheet.create({
   },
   textSign: {
     color: 'white',
-    fontWeight: 'bold',
+    fontFamily:'Calibri-bold',
     fontSize: 20
   }
 
@@ -120,3 +130,5 @@ const styles = StyleSheet.create({
 });
 
 export default Lo;
+
+

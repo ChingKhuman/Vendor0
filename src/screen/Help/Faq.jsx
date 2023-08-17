@@ -79,8 +79,8 @@ const Faq = () => {
         <ScrollView>
             <View style={{paddingHorizontal: 8}}>
                 <View>
-                    <Text style={{ fontSize: SIZES.h2, padding: 7,textAlign:"center"
-                 }}> Faqs</Text>
+                    <Text style={{ fontSize: 20, padding: 7,textAlign:"center", fontFamily:'Calibri-Regular',
+                 }}> Frequently Ask </Text>
                     
                 </View>
                     {/* <Spinner visible={loading} /> */}

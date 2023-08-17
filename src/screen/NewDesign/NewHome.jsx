@@ -11,6 +11,10 @@ import { Modal } from 'react-native';
 import { Button } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { Alert } from 'react-native';
+import { ToastAndroid } from 'react-native';
+import { Colors } from 'react-native/Libraries/NewAppScreen';
+import { style } from 'deprecated-react-native-prop-types/DeprecatedViewPropTypes';
+import { COLORS } from '../../constants/theme';
 
 
 
@@ -65,7 +69,7 @@ const NewHome = ({ navigation }) => {
                 });
                 setLaoding(false)
                 setpieData(colorData)
-                //  console.log('checking.....',colorData)
+                  console.log('checking.....',colorData)
             }).catch(function (error) {
                 console.log(error)
                 setLaoding(false)
@@ -88,7 +92,7 @@ const NewHome = ({ navigation }) => {
             }).
             then(function (myJson) {
                 let cont = myJson?.data.amount;
-                setPieAmount(cont)
+                setPieAmount(cont);
                 let Color1 = ['red', 'blue', 'green', '#2C5AA2']
                 let colorData1 = cont.map((row, index) => {
                     return {
@@ -100,7 +104,7 @@ const NewHome = ({ navigation }) => {
                 setpieAData(colorData1);
 
             }).catch(function (error) {
-                console.log(error)
+                console.log(error);
             })
     }
     useEffect(() => {
@@ -124,7 +128,7 @@ const NewHome = ({ navigation }) => {
                 let Yield = myJson?.data.yield;
                 setYieVal(Yield);
             }).catch(function (error) {
-                console.log(error)
+                console.log(error);
             })
 
     }
@@ -135,19 +139,12 @@ const NewHome = ({ navigation }) => {
 
     const onRefresh = React.useCallback(() => {
         fetch( `${BASE_URL}/account/validate-jwt`, requestOptions)
-            .then(function (response){
-            if(response.ok){              
-                return response.json();
-            }
-            throw new Error ('Something went wrong')
-
-            }).then(function(myJson){
-                 let result = myJson.data
-                console.log('Check......',result)
-               
+            .then(response => response.json()
+          ).then(result=>{                 
+               //  console.log('Check......',result)               
                 {
-                            if (result === null) {
-                                Alert.alert('Session Expire, Please Logout')
+                            if (result.data === null) {
+                                showToast('Session Expired.Login Again');
                                 
                             }
                             else {
@@ -155,7 +152,7 @@ const NewHome = ({ navigation }) => {
                                 setTimeout(() => {
                                     setRefreshing(false);
 
-                                }, 4000);
+                                }, 2000);
                             }
                         }
             })
@@ -164,13 +161,15 @@ const NewHome = ({ navigation }) => {
                 
             })
    }, []);
-
+   const showToast = (message) => {
+    ToastAndroid.show(message, ToastAndroid.LONG);
+  };
 
     const series1 = pieCount.map(item =>
         item.allOfferCount
     )
 
-
+  
 
 
     // Set different color styles based on x value
@@ -220,8 +219,8 @@ const NewHome = ({ navigation }) => {
        
     ]
 
-    const animation = useRef(new Animated.Value(0)).current;
-    const [isButtonClick, setIsButtonClick] = useState(false);
+    // const animation = useRef(new Animated.Value(0)).current;
+    // const [isButtonClick, setIsButtonClick] = useState(false);
 
     const theme = useColorScheme();
     const isDarkTheme = theme === 'dark';
@@ -271,7 +270,7 @@ const NewHome = ({ navigation }) => {
                
                 setModalVisible(!modalVisible)
                 Alert.alert('Nominee added sucessfull')
-             //    console.log(result)
+             //   console.log(result)
             }
             )
     }
@@ -320,7 +319,7 @@ const NewHome = ({ navigation }) => {
         fetch(`${BASE_URL}/autoinvest/auto-invest-on/2`, requestOptions3)
             .then(response => response.text())
             .then(result => {
-                Alert.alert('You have successfully turn on EMI')
+                showToast('You have successfully turn on EMI')
                 setIsUpdateOn((prev) => !prev);
                 console.log(result)
             }
@@ -346,9 +345,9 @@ const NewHome = ({ navigation }) => {
         fetch(`${BASE_URL}/autoinvest/auto-invest-off`, requestOptions3)
             .then(response => response.text())
             .then(result => {
-                Alert.alert('You have successfully turn off EMI')
+                showToast('You have successfully turn off EMI')
                 setIsUpdateOn((prev) => !prev);
-                console.log(result)
+                // console.log(result)
             }
             )
 
@@ -357,6 +356,7 @@ const NewHome = ({ navigation }) => {
 
     }
 
+   
 
 
 
@@ -372,17 +372,15 @@ const NewHome = ({ navigation }) => {
                         onRequestClose={() => setModalVisible(false)}
                     >
                         <View style={styles.centeredView}>
-
-
-                            <View>
+                            <View style={{backgroundColor:'green' , alignItems: 'center',borderRadius: 8,padding: 10,}}>
                                 <Text style={{
-                                    color: 'white', fontSize: 15, textAlign: 'center', paddingTop: 10,
-                                    borderWidth: 1, borderColor: 'green', backgroundColor: 'green'
+                                    color: 'white', fontSize: 15, textAlign: 'center', 
+                                
                                 }}>Add Nominee</Text>
                             </View>
                             <View >
 
-                                <View style={{ width: 250, alignItems: 'center' }}>
+                                <View style={styles.textInput1}>
                                     <TextInput
                                         name="Name"
                                         placeholder="Name"
@@ -403,7 +401,8 @@ const NewHome = ({ navigation }) => {
                                         open={listOpen}
                                         setOpen={itemValue => setListOpen(itemValue)}
                                         items={listData}
-                                        value={formValue.nDNomRelationship}
+                                        key={listData.value}
+                                        value={ formValue.nDNomRelationship}
                                         setValue={(item) => setFormValue({
                                             ...formValue,
                                             nDNomRelationship: item(),
@@ -451,15 +450,21 @@ const NewHome = ({ navigation }) => {
 
 
 
-                                    <View style={styles.container}>
-                                        <TouchableOpacity style={{ width: 100, height: 30, marginTop: 20 }}
+                                        <TouchableOpacity style={styles.handleNominee}
                                             //  onPress={()=> Alert.alert("Form Value", JSON.stringify(formValue))}
                                             onPress={handleNominee}
                                         >
-                                            <Text style={{ color: 'white', textAlign: 'center' }}>Submit</Text>
+                                            <Text style={{ color: 'white', textAlign: 'center', fontFamily:'Calibri-bold',fontSize:15 }}>SUBMIT</Text>
                                         </TouchableOpacity>
-                                    </View>
-                                    <Button title='CLose' onPress={() => setModalVisible(false)} />
+                                  
+                                        <TouchableOpacity style={styles.handleNominee}
+                                            //  onPress={()=> Alert.alert("Form Value", JSON.stringify(formValue))}
+                                            onPress={() => setModalVisible(false)}
+                                        >
+                                            <Text style={{ color: 'white', textAlign: 'center', fontFamily:'Calibri-bold',fontSize:15 }}>CLOSE</Text>
+                                    
+                                        </TouchableOpacity>
+                                   
                                 </View>
 
                             </View>
@@ -475,7 +480,6 @@ const NewHome = ({ navigation }) => {
             <ScrollView style={[
                 {
                     flex: 0,
-
                 },
                 isDarkTheme
                     ? { backgroundColor: 'black' }
@@ -493,16 +497,18 @@ const NewHome = ({ navigation }) => {
                     isUpdateOn ?
                         (<TouchableOpacity  onPress={AutoOf}>
                          
-                          <Text style={{textAlign:'right', padding: 10,
-                          backgroundColor: 'orange',borderRadius: 100 }} >AOTO OFF</Text>
+                          <Text style={{textAlign:'right',paddingRight: 20,borderRadius: 100,
+                              fontFamily:'Calibri-Regular', padding: 5, backgroundColor: COLORS.green,
+                           width: 130,color:'white'}} >TURN OFF EMI</Text>
                        
                            
                         </TouchableOpacity>
                         ) : 
                             (<TouchableOpacity  onPress={AutoOn}>
                            
-                              <Text style={{textAlign:'right',paddingRight: 20,borderRadius: 100, padding: 10, backgroundColor: 'green',
-                           width: 100}} >AOTO ON</Text>
+                              <Text style={{textAlign:'right',paddingRight: 20,borderRadius: 100,
+                              fontFamily:'Calibri-Regular', padding: 5, backgroundColor: COLORS.green,
+                           width: 130,color:'white'}} >TURN ON EMI</Text>
                         
                                 
                             </TouchableOpacity>
@@ -514,7 +520,7 @@ const NewHome = ({ navigation }) => {
 
                    
                     <View style={{
-                        backgroundColor: 'white', marginVertical: 30, borderRadius: 5,
+                        backgroundColor: 'white', marginVertical: 15, borderRadius: 5,
                         marginHorizontal: 10
                     }}>
 
@@ -522,11 +528,11 @@ const NewHome = ({ navigation }) => {
                             paddingHorizontal: 10, marginTop: 20,
                             justifyContent: 'space-between',
                         }}>
-                            <Text style={styles.Text5}> YIELDS </Text>
-                            <Text style={{
+                            <Text style={styles.Text5}> YIELD </Text>
+                            {/* <Text style={{
                                 color: '#27666A', fontSize: 15,
-                                marginBottom: 1, fontFamily: 'sans-serif',
-                            }}> Total Yield</Text>
+                                marginBottom: 1, fontFamily: 'Calibri-Regular',
+                            }}> Total Yield</Text> */}
 
                             <Text style={{
                                 fontSize: 13, color: '#27666A', paddingLeft: 7, paddingBottom: 10,
@@ -536,7 +542,9 @@ const NewHome = ({ navigation }) => {
                         </View>
 
 
-                        <Text style={{ height: 25, marginVertical: 10, color: 'blue', fontFamily: 'sans-serif', textAlign: 'center' }}>  Note: The ....</Text>
+                        <Text style={{ height: 25, marginVertical: 10, color: 'grey', fontFamily: 'Calibri-Regular', textAlign: 'center' }}> 
+                        
+                        </Text> 
 
                     </View>
                 </View>
@@ -548,7 +556,7 @@ const NewHome = ({ navigation }) => {
                     <Card style={{ width: 370 }} >
 
                         <View style={{ alignItems: 'center' }}>
-                            <Text style={{ color: 'black', padding: 5, }}>Offer Counts Details</Text>
+                            <Text style={{ color: 'black', padding: 5,fontFamily:'Calibri-bold',fontSize:20, }}> Count </Text>
                         </View>
 
                         <View style={{ alignItems: 'flex-end', marginTop: 5, marginRight: 5 }}>
@@ -593,7 +601,8 @@ const NewHome = ({ navigation }) => {
                                                         : 'blue'
                                         }
                                     }}
-                                    labels={({ datum }) => datum.x}
+                                    labels={({ datum }) => {datum.x 
+                                    datum.y}}
 
                                     data={pieData}
                                     x='name'
@@ -685,7 +694,7 @@ const NewHome = ({ navigation }) => {
                             alignItems: 'center',
                             marginTop: 20
                         }}>
-                            <Text style={{ color: 'black', padding: 5, fontSize: 20 }}>Offer Amount Details</Text>
+                            <Text style={{ color: 'black', padding: 5, fontSize: 20,fontFamily:'Calibri-bold' }}> Amount </Text>
                         </View>
                         <View style={{ alignItems: 'flex-end', marginTop: 5, marginRight: 5 }}>
                             <RadioForm
@@ -794,14 +803,14 @@ const NewHome = ({ navigation }) => {
 
                 <View style={styles.footer} >
 
-                    <Text style={{
+                    {/* <Text style={{
                         color: 'black', textAlign: 'center', fontWeight: 'bold',
                         fontFamily: 'Georgia',
                         backgroundColor: "white",
                         paddingHorizontal: 35,
                         paddingVertical: 8
 
-                    }}>Copyright @ 2021-2022<Text style={{ color: 'blue' }}>UpCap.</Text>All right Reserved.</Text>
+                    }}>Copyright @ 2021-2022<Text style={{ color: 'blue' }}>UpCap.</Text>All right Reserved.</Text> */}
 
                 </View>
 
@@ -811,28 +820,28 @@ const NewHome = ({ navigation }) => {
                 <View style={{ flex: 0.9 }}>
                     <Animated.View style={{ opacity: fadeAnim }}>
                         <TouchableOpacity style={{
-                            backgroundColor: 'powderblue',
+                            backgroundColor: '#5B5FB6',
                             borderBottomRightRadius: 30, borderTopRightRadius: 30, padding: 10,
                         }} onPress={() => navigation.navigate('NewInvoice')}>
-                            <Text style={{ textAlign: 'center', color: 'black', fontSize: 20 }}>Invest</Text>
+                            <Text style={{ textAlign: 'center', color: 'white', fontSize: 20, fontFamily:'Calibri-bold', }}>Invest</Text>
                         </TouchableOpacity>
                     </Animated.View>
                 </View>
-                <View style={{ flex: 1, backgroundColor: 'orange', borderRadius: 30, }}>
+                <View style={{ flex: 1, backgroundColor:COLORS.green, borderRadius: 30, }}>
                     <TouchableOpacity onPress={fadeIn}>
                         <Text style={{
                             textAlign: 'center', paddingTop: 5,
-                            fontSize: 25
+                            fontSize: 25,color:'white', fontFamily:'Calibri-Regular',
                         }}>Home</Text>
                     </TouchableOpacity>
                 </View>
                 <View style={{ flex: 0.9 }}>
                     <Animated.View style={{ opacity: fadeAnim }}>
                         <TouchableOpacity style={{
-                            backgroundColor: 'powderblue',
+                            backgroundColor: '#5B5FB6',
                             borderBottomLeftRadius: 30, borderTopLeftRadius: 30, padding: 10,
                         }} onPress={() => navigation.navigate('NewReport')}>
-                            <Text style={{ textAlign: 'center', color: 'black', fontSize: 20 }}> Report</Text>
+                            <Text style={{ textAlign: 'center', color: 'white', fontSize: 20,fontFamily:'Calibri-bold' }}> Report</Text>
 
                         </TouchableOpacity>
                     </Animated.View>
@@ -866,6 +875,7 @@ const styles = StyleSheet.create({
         flex: 0,
         flexDirection: 'row',
     },
+   textInput1: { width: 250, alignItems: 'center' },
 
 
     View8: {
@@ -882,7 +892,7 @@ const styles = StyleSheet.create({
     },
     Text5: {
         color: 'grey', fontSize: 19, fontFamily: 'sans-serif',
-        fontWeight: 'bold',
+        fontFamily:'Calibri-bold',
         marginBottom: 10
 
     },
@@ -931,6 +941,9 @@ const styles = StyleSheet.create({
         borderWidth: StyleSheet.hairlineWidth,
         borderRadius: 10,
     },
+    handleNominee: { padding: 10, paddingHorizontal: 20,borderRadius: 8,
+        backgroundColor: '#5B5FB6',marginTop: 10 },
+     
 
 })
 

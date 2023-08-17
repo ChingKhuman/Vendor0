@@ -5,12 +5,13 @@ import { ScrollView, TouchableOpacity } from 'react-native-gesture-handler';
 import { AuthContext } from '../../context/AuthContext';
 import { BASE_URL } from '../../constants/Config';
 import Icon from 'react-native-vector-icons/FontAwesome'
-import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
+// import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { Card } from 'react-native-paper';
 import { Modal } from 'react-native';
 import { Formik } from 'formik';
 import * as yup from 'yup';
 import DropDownPicker from 'react-native-dropdown-picker';
+import * as ImagePicker from 'react-native-image-picker';
 
 
 
@@ -27,6 +28,7 @@ const Profile = ({ navigation }) => {
   const [profileData2, setProfileData2] = useState([])
   const [selectedImage, setSelectedImage] = useState('');
   const { loading, userInfo } = useContext(AuthContext);
+   console.log(userInfo)
   const token = userInfo.data?.accessToken
   var myHeaders = new Headers();
   myHeaders.append("Authorization", token);
@@ -53,7 +55,7 @@ const Profile = ({ navigation }) => {
         setProfileData1(result)
         let result2 = myJson.data.right
         setProfileData2(result2)
-        // console.log(myJson)
+         console.log(myJson.data.left)
 
 
       })
@@ -66,6 +68,13 @@ const Profile = ({ navigation }) => {
   useEffect(() => {
     getData()
   }, [])
+
+  const status =userInfo.data.userStatus
+  const Name = userInfo.data.userEmail
+  const String =Name.substring(0, 1).toUpperCase()
+ 
+  
+ 
 
   const LeftContent = <Icon name="home" size={30} />
 
@@ -142,10 +151,10 @@ const Profile = ({ navigation }) => {
         ) : result.code === 400 ? (
           Alert.alert('Curent is Wrong')
         ) : Alert.alert('ok')
-          setmodal2(!modal2)
-          navigation.navigate('Profile')
+        setmodal2(!modal2)
+        navigation.navigate('Profile')
 
-        console.log(result)
+       
       }
 
 
@@ -205,6 +214,8 @@ const Profile = ({ navigation }) => {
 
       .then(result => {
         setmodal1(!modal1)
+       console.log(result)
+       Alert.alert('OTP and Verification e-Mail sent successfully.')
       }
         // console.log(result)
       )
@@ -266,14 +277,128 @@ const Profile = ({ navigation }) => {
   ]
 
   useEffect(() => {
-    if(formValue?.nDNomRelationship==='3'){
+    if (formValue?.nDNomRelationship === '3') {
       setisChildSelected(true);
-    }else{
+    } else {
       setisChildSelected(false);
     }
   }, [formValue?.nDNomRelationship])
-  
 
+
+ //===================Image Picker=============
+//  const selectImage = () => {
+//   ImagePicker.showImagePicker(
+//     {
+//       title: 'Select Profile Picture',
+//       mediaType: 'photo',
+//       quality: 0.7,
+//     },
+//     response => {
+//       if (response.didCancel) {
+//         console.log('User cancelled image picker');
+//       } else if (response.error) {
+//         console.log('ImagePicker Error: ', response.error);
+//       } else {
+//         setSelectedImage(response.uri);
+//       }
+//     }
+//   );
+// };
+
+
+// const [profilePic, setProfilePic] = useState()
+// const uploadImage = async () => {
+
+//   // const profilePic = new FormData();
+//   // profilePic.append('profileImage', {
+//   //   uri: selectedImage,
+//   //   type: 'image/jpeg', // or the appropriate mime type
+//   //   name: 'profile.jpg',
+//   // });
+//   if(profilePic){
+//     try {
+//       let token3= userInfo.data?.accessToken
+  
+     
+//       const imageBlob = new Blob([profilePic], { type: 'image/jpeg' }); // Adjust the type as needed
+
+//       const formData = new FormData();
+//       formData.append('profilePic', imageBlob, 'profile.jpg');
+//       const response = await fetch(`${BASE_URL}/registration/user-profile-pic`,
+//       request);
+//       const request = {
+//         method: 'POST', 
+//         headers: {
+//           'Content-Type': 'multipart/form-data',
+//           "Authorization": token3
+//         }, 
+//         body: formData
+//       }
+//       if (response.code ===200) {
+//         console.log('Image uploaded successfully');
+//         // You might want to refresh the user's profile data here
+//       } else {
+//         console.log('Image upload failed');
+//       }
+//     } catch (error) {
+//       console.error('Error uploading image:', error);
+//     }
+//   }
+ 
+// };
+
+const [profileImage, setProfileImage] = useState(null);
+
+const selectImage = () => {
+  const options = {
+    title: 'Select Profile Picture',
+    storageOptions: {
+      skipBackup: true,
+      path: 'images',
+    },
+  };
+
+  ImagePicker.launchImageLibrary(options, response => {
+    if (response.didCancel) {
+      console.log('Image selection cancelled');
+    } else if (response.error) {
+      console.log('ImagePicker Error: ', response.error);
+    } else {
+      setProfileImage(response.uri);
+      // Call the upload function here
+      uploadProfilePicture(response);
+    }
+  });
+};
+
+const uploadProfilePicture = async imageResponse => {
+  const formData = new FormData();
+  formData.append('profilePic', {
+    uri: imageResponse.uri,
+    type: imageResponse.type,
+    name: 'profile.jpg',
+  });
+
+  try {
+    const response = await fetch(`${BASE_URL}/registration/user-profile-pic`, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        // Add any authorization headers if needed
+      },
+    });
+
+    if (response.ok) {
+      console.log('Profile picture uploaded successfully');
+      // Handle the response from the server if needed
+    } else {
+      console.log('Failed to upload profile picture');
+    }
+  } catch (error) {
+    console.log('Error uploading profile picture', error);
+  }
+};
 
   return (
     <>
@@ -282,15 +407,34 @@ const Profile = ({ navigation }) => {
         <View style={styles.header}>
 
           <View style={{
-            alignItems: 'center'
+            alignItems: 'center',
+            paddingTop:10
+            
           }}>
-            <Image style={{
+            {/* <Image style={{
               borderWidth: 1, borderColor: 'grey', borderRadius: 200,
               padding: 5, height: 100, width: 100
             }}
-              source={{ uri: selectedImage }}
-            />
+               source={{ uri: selectedImage }}
+              // {userInfo?.data?.image}             
+            /> */}
+            <Text style={{
+              borderWidth: 1, borderColor: 'grey', borderRadius: 200,
+              padding: 5, height: 100, width: 100, fontSize:60, textAlign:'center', backgroundColor: 'grey'
+            }}>{String}</Text>
 
+{/* {selectedImage && (
+        <Image source={{ uri: selectedImage }} style={{  borderWidth: 1, borderColor: 'grey', borderRadius: 200,
+              padding: 5, height: 100, width: 100 }} />
+      )}
+      {selectedImage && (
+        <TouchableOpacity onPress={uploadImage}>
+          <Text>Upload Profile Picture</Text>
+        </TouchableOpacity>
+      )} */}
+ 
+ {profileImage && <Image source={{ uri: profileImage }} style={{ width: 200, height: 200 }} />}
+   
 
           </View>
 
@@ -298,8 +442,8 @@ const Profile = ({ navigation }) => {
             <View>
 
               <View style={{ alignItems: 'center', padding: 10 }}>
-                <Text style={{ fontSize: 20, color: 'black', fontFamily: 'serif' }}>Investor1</Text>
-                <Text style={{ fontFamily: 'Georgia', fontSize: 17 }}>Status: Active</Text>
+                <Text style={{ fontSize: 23, color: 'black',  fontFamily:'Calibri-bold', }}>Investor1</Text>
+                <Text style={{  fontFamily:'Calibri-bold', fontSize: 17, color: 'green' }}>Status: {status}</Text>
               </View>
 
               {profileData1.map((item, index) =>
@@ -317,36 +461,38 @@ const Profile = ({ navigation }) => {
                   backgroundColor: 'green', borderWidth: 1,
                   borderColor: 'green', width: 200, paddingVertical: 8, alignItems: 'center'
                 }} onPress={() => setmodal0(true)}>
-                  <Text style={{ textAlign: 'center' }}>Change Modify</Text>
+                  <Text style={{ textAlign: 'center', fontFamily:'Calibri-bold',fontSize: 18 }}>Change Modify</Text>
                 </TouchableOpacity>
               </View>
             </View>
           </Card>
 
 
-          <Card style={{ margin: 20, marginBottom: 15 }}>
+          <Card style={{ margin: 10, marginBottom: 15 }}>
+
+            <View>
+
+              <View style={{ alignItems: 'center', padding: 10 }}>
+                <Text style={{ fontSize: 23, color: 'black',  fontFamily:'Calibri-bold', }}>Information</Text>
+
+              </View>
+
+              {profileData2.map((item, index) =>
+                <View style={{ padding: 20, flexDirection: 'row', justifyContent: 'space-between' }} key={index.id} >
 
 
-            <View style={{ alignItems: 'center', padding: 10 }}>
-              <Text style={{ fontSize: 20, color: 'black', fontFamily: 'serif' }}>Information</Text>
+                  <Text style={{ width: 120, fontFamily:'Calibri-Regular', }}>{item.name} :</Text>
+                  <Text style={{ color: 'black', fontFamily:'Calibri-Regular', }} >{item.value}</Text>
 
+                </View>)}
             </View>
-
-            {profileData2.map((item, index) =>
-              <View style={{ padding: 20, flexDirection: 'row', justifyContent: 'space-between' }} key={index.id} >
-
-
-                <Text style={{ width: 120 }}>{item.name} :</Text>
-                <Text style={{ color: 'black' }} >{item.value}</Text>
-
-              </View>)}
           </Card>
         </View>
 
 
       </ScrollView>
       <View style={styles.footer} >
-        <Text style={{ textAlign: 'center', paddingVertical: 10, fontFamily: 'Georgia' }}>Copyright @ 2021-2022<Text style={{ color: 'blue' }}>UpCap.</Text>All right Reserved.</Text>
+        <Text style={{ textAlign: 'center', paddingVertical: 10,  fontFamily:'Calibri-bold', }}>Copyright @ 2021-2022<Text style={{ color: 'blue' }}>UpCap.</Text>All right Reserved.</Text>
 
       </View>
 
@@ -383,6 +529,7 @@ const Profile = ({ navigation }) => {
                 open={listOpen}
                 setOpen={itemValue => setListOpen(itemValue)}
                 items={listData}
+                key={listData}
                 value={formValue.nDNomRelationship}
                 setValue={(item) => setFormValue({
                   ...formValue,
@@ -391,34 +538,34 @@ const Profile = ({ navigation }) => {
               />
 
 
-             {
-              isChildSelected?
-             <>
-              <TextInput
-                name="Name"
-                placeholder="Legal Guardian Name"
-                style={styles.textInput}
-                defaultValue={formValue.nDLegalGardName}
-                onChangeText={(item) => setFormValue({
-                  ...formValue,
-                  nDLegalGardName: item
-                })}
+              {
+                isChildSelected ?
+                  <>
+                    <TextInput
+                      name="Name"
+                      placeholder="Legal Guardian Name"
+                      style={styles.textInput}
+                      defaultValue={formValue.nDLegalGardName}
+                      onChangeText={(item) => setFormValue({
+                        ...formValue,
+                        nDLegalGardName: item
+                      })}
 
-              />
-              <TextInput
-              name="Name"
-              placeholder="Legal Guardian Address"
-              style={styles.textInput}
-              defaultValue={formValue.nDLegalGarAddress}
-              onChangeText={(item) => setFormValue({
-                ...formValue,
-                nDLegalGarAddress: item
-              })}
+                    />
+                    <TextInput
+                      name="Name"
+                      placeholder="Legal Guardian Address"
+                      style={styles.textInput}
+                      defaultValue={formValue.nDLegalGarAddress}
+                      onChangeText={(item) => setFormValue({
+                        ...formValue,
+                        nDLegalGarAddress: item
+                      })}
 
-            /></>
-              :null
-             }
-            
+                    /></>
+                  : null
+              }
+
 
               <TextInput
                 name="Mobile"
@@ -454,13 +601,6 @@ const Profile = ({ navigation }) => {
                 })}
 
               />
-
-
-
-
-
-
-
             </View>
 
 
@@ -584,15 +724,15 @@ const Profile = ({ navigation }) => {
                   {touched.confirmPassword && errors.confirmPassword && (
                     <Text style={styles.errorText}>{errors.confirmPassword}</Text>
                   )}
-                 <View>
-                 <Button title='Submit' onPress={handleSubmit} />
-                  <Button title='Go Back' onPress={() => setmodal2(!modal2)} />
-                 </View>
+                  <View>
+                    <Button title='Submit' onPress={handleSubmit} />
+                    <Button title='Go Back' onPress={() => setmodal2(!modal2)} />
+                  </View>
                 </>
               )}
 
             </Formik>
-          
+
           </View>
         </View>
       </Modal>
@@ -607,8 +747,8 @@ const Profile = ({ navigation }) => {
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
 
-            <View style={{ alignItems: 'center', padding: 5 ,paddingVertical: 15 }}>
-              <Button title='  Edit New profile  ' onPress={() => {
+            <View style={{ alignItems: 'center', padding: 5, paddingVertical: 15 }}>
+              {/* <Button title='  Edit New profile  ' onPress={() => {
                 ImagePicker();
               }}
                 style={{
@@ -616,28 +756,29 @@ const Profile = ({ navigation }) => {
                   backgroundColor: 'green', borderWidth: 1,
                   borderColor: 'green', width: 200, paddingVertical: 8, alignItems: 'center'
                 }}>
-
-              </Button>
-
+              </Button> */}
+               <Button title="Select Profile Picture" onPress={selectImage} />
+              
+             
             </View>
-            <View style={{ alignItems: 'center', padding: 5,paddingVertical: 15 }}>
+            <View style={{ alignItems: 'center', padding: 5, paddingVertical: 15 }}>
               <Button title='Change Password' onPress={() => setmodal2(true)}>
 
               </Button>
             </View>
-            <View style={{ alignItems: 'center', padding: 5 ,paddingVertical: 15}}>
+            <View style={{ alignItems: 'center', padding: 5, paddingVertical: 15 }}>
               <Button title='Change New Email' onPress={() => setmodal1(true)}>
                 <Text style={{ position: 'relative', color: 'white' }}> Change Email</Text>
               </Button>
             </View>
-            <View style={{ alignItems: 'center', padding: 5 ,paddingVertical: 15,}}>
+            <View style={{ alignItems: 'center', padding: 5, paddingVertical: 15, }}>
               <Button title=' Update    Nominee ' onPress={() => setModal(true)}>
                 <Text style={{ position: 'relative', color: 'white' }}> Add Nominee</Text>
               </Button>
             </View>
-           <View style={{paddingVertical: 15}} >
-           <Button title='Back' onPress={() => setmodal0(!modal0)} />
-           </View>
+            <View style={{ paddingVertical: 15 }} >
+              <Button title='Back' onPress={() => setmodal0(!modal0)} />
+            </View>
           </View>
         </View>
 
@@ -673,7 +814,7 @@ const styles = StyleSheet.create({
   },
   centeredView: {
     flex: 1,
-    
+
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 0,
@@ -684,7 +825,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 20,
     padding: 20,
-  
+
     width: 350,
 
     shadowColor: '#000',

@@ -58,7 +58,7 @@ const Glossary = () => {
             then(function (myJson) {
                 let result = myJson.data
                 setGlosary(result)
-              //  console.log('check...result..', result)
+                console.log('check...result..', result)
                 setLoading(false)
 
             })
@@ -93,7 +93,7 @@ const Glossary = () => {
                 <View>
                     <View style={{ justifyContent: 'space-between', paddingHorizontal: 10 }}>
                         {/* <Spinner visible={loading} /> */}
-                        <Text> New apply</Text>
+                       
 
                 {/* {
                     glossary.map((category)=> (
@@ -137,12 +137,13 @@ const Glossary = () => {
                                                                      }
                                                             }}
                                                             activeOpacity={0.9} style={{ alignItems: 'center', justifyContent: 'center' }}>
-                                                            <Text style={{color: 'black', fontSize:20,fontFamily: 'serif', borderWidth:1,borderColor:'grey',
+                                                            <Text style={{color: 'black', fontSize:15, fontFamily:'Calibri-Regular',
+                                                             borderWidth:1,borderColor:'grey',
                                                         width:'100%', }} key={term}>{term.replace(regex, '')}</Text>
                                                         </TouchableOpacity>
                                                            {isOpened &&  i===activeSection && index===activeTask && (
                                                             <View>
-                                                                <Text  style={{fontSize: 15, fontWeight: '800',fontFamily:'serif',
+                                                                <Text  style={{fontSize: 15,  fontFamily:'Calibri-bold',
                                                             color: 'grey'}} key={definition}> {definition.replace(regex, '')}
                                                             </Text>
                                                             </View>
@@ -178,10 +179,10 @@ const styles = StyleSheet.create({
     },
     heading: {
         fontSize: 20,
-        
+        fontFamily:'Calibri-Regular',
         // textTransform: 'uppercase',
         letterSpacing: -2,
-        color: 'black',
+        color: 'grey',
 
     },
     bodyterm: {

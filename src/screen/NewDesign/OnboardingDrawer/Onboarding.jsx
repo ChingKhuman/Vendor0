@@ -1,5 +1,5 @@
 import { View, Text, TouchableOpacity } from 'react-native'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useContext } from 'react';
 import { AuthContext } from '../../../context/AuthContext';
 import { useState } from 'react';
@@ -9,23 +9,25 @@ import { StyleSheet } from 'react-native';
 import { BASE_URL } from '../../../constants/Config';
 import { Card } from 'react-native-paper';
 import { Alert } from 'react-native';
-  import { DigioRNComponent } from 'digio-sdk-rn';
- 
+import { DigioRNComponent } from 'digio-sdk-rn';
+import { NativeModules } from 'react-native';
+import { Dimensions } from 'react-native';
+import Digio from '../Digio';
 
-const Onboarding = () => {
-   
 
-    const digioApiBaseUrl = 'https://ext.digio.in/sdk/v11/digio.js'
+const Onboarding = ({ navigation }) => {
 
-    const { userInfo,  } = useContext(AuthContext);
+
+    const { userInfo, } = useContext(AuthContext);
     const token = userInfo.data?.accessToken;
 
     const [initialData, setInitialData] = useState('');
     const [tracker, settracker] = useState('')
     const [modalVisible, setModalVisible] = useState(true);
     const [step, setstep] = useState("")
+    const [loading, setLoading] = useState(false);
 
-   
+
 
     var myHeaders = new Headers();
     myHeaders.append("Authorization", token);
@@ -42,12 +44,14 @@ const Onboarding = () => {
             let res = result
             //   console.log('check tracker status',res)    
             settracker(res)
-          
+
+
+
         })
         .catch(error => console.log('error', error));
 
-        //--------------------begin onboarding
-        
+    //--------------------begin onboarding
+
     const OnboardingBegin = async () => {
         var raw = JSON.stringify({
             "step": step
@@ -61,128 +65,201 @@ const Onboarding = () => {
             },
             body: raw,
         }
-            fetch(`${BASE_URL}/onboard/digiokycrequest`, requestOptions1)
-                .then(response => response.json())
-                .then((result) =>       
-                
-             
-                      { 
-                        let results = result
-                        console.log(result) 
-                 if  ( results.code === 200 )
-                 {
-                    Alert.alert('OK')
-                  
+        fetch(`${BASE_URL}/onboard/digiokycrequest`, requestOptions1)
+            .then(response => response.json())
+            .then((result) => {
+                let results = result
+                console.log(result)
+                if (results.code === 200) {
                     setInitialData(result)
                     setModalVisible(!modalVisible)
-                  
-                 }  else{
-                    Alert.alert('Something went wrong')          
-                      }   }    )     
 
-                .catch(error => console.log('error', error));    
-                }    
-                
-        const digiID = initialData?.data?.kyc_ID
-        const digioUserIdentifiervalue = initialData?.data?.customer_identifier
-        const digiToken = initialData?.data?.access_token
-
-       
-          
-  const [digioDocumentId, setDigioDocumentId] = useState(digiID);
-  const [digioUserIdentifier, setDigioUserIdentifier] = useState(digioUserIdentifiervalue);
-  const [digioLoginToken, setDigioLoginToken] = useState(digiToken);
-  const options = {
-    environment: 'sandbox',
-    logo: 'https://finsightventures.in/upcap/assets/dist/img/Logo.png',
-    theme: {
-        primaryColor: '#AB3498',
-        secondaryColor: '#000000'
+                    // navigation.navigate('OnboardingDigio')
+                } else {
+                    Alert.alert('Something went wrong')
+                }
+            })
+            .catch(error => console.log('error', error));
     }
-  };
 
-//   const options = {
-//     environment: 'sandbox',
-//     logo: 'https://finsightventures.in/upcap/assets/dist/img/Logo.png',
-//     theme: {
-//         primaryColor: '#AB3498',
-//         secondaryColor: '#000000'
-//     },
-//   };
+    // useEffect(()=> {
+    //     OnboardingBegin()
+    // },[])
 
-  const onSuccess = (t) => {
-   setDigioDocumentId(t)
-   setDigioUserIdentifier(t)
-   setDigioLoginToken(t)
-    console.log(t + ' Response from Digio SDk ');
-  };
-
-  const onCancel = () => {
-    console.log('Cancel Response from Digio SDk ');
-  };
-
-  return (
-    <View>
-      <Text style={{textAlign: 'center', color: 'black', }}>Onboarding</Text>
-     
-                    <Modal
-                    style={styles.modalView}
-                        animationType="slide"
-                        transparent={true}
-                        visible={modalVisible}
-                        onRequestClose={() => setModalVisible(false)}
-                    > 
-                        <View style={styles.centeredView}>
+    const digiID = initialData?.data?.kyc_ID
+    const digioUserIdentifiervalue = initialData?.data?.customer_identifier
+    const digiToken = initialData?.data?.access_token
 
 
-                            <View style={{
-                                     fontSize: 15, textAlign: 'center', paddingTop: 10,
-                                    borderWidth: 1, borderColor: 'green', backgroundColor: 'white'
-                                }}>
-                                <Text style={{color: 'black', fontSize: 18, textAlign: 'center',
-                            paddingVertical: 15}}>Begin KYC</Text>
-                                <Text style={{color: 'green', fontSize: 15, textAlign: 'center'}}>
-                                    Please Note: 
-                                </Text>
-                                <Text style={{padding: 10}}>If any of the PAN details displayed are inaccurate,
-                                 do 
-                                    correct them.
-                                </Text>
-                               <View style={{paddingVertical: 10}}>
-                               <Button title='Ok' onPress={OnboardingBegin}/>
-                               </View>
-                               <View style={{paddingBottom: 10}}>
-                               <Button title='Close' onPress={()=> setModalVisible(false)}/>
-                               </View>
-                               
-                            </View>
-                
+
+    const [digioDocumentId, setDigioDocumentId] = useState(digiID);
+    const [digioUserIdentifier, setDigioUserIdentifier] = useState(digioUserIdentifiervalue);
+    const [digioLoginToken, setDigioLoginToken] = useState(digiToken);
+    // const [options, setoptions] = useState({
+    //     environment: 'sandbox',
+    //     logo: 'https://finsightventures.in/upcap/assets/dist/img/Logo.png',
+    //     theme: {
+    //         primaryColor: '#AB3498',
+    //         secondaryColor: '#000000'
+    //     }
+    // });
+
+
+
+
+
+    // const options = {
+    //     environment: 'sandbox',
+    //     callback: function (response) {
+    //         if (response.hasOwnProperty('error_code')) {
+    //             return console.log(response)
+    //         }
+    //         console.log(response);
+    //         let request = {
+    //             'invoiceID': invoiceID,
+    //             'digio_doc_id': response.digio_doc_id,
+    //             'txn_id': response.txn_id
+    //         }
+
+    //         fetch(`${BASE_URL}/wallet/sign`, {
+    //             method: "POST",
+    //             headers: {
+    //                 "content-type": "application/json",
+    //                 Authorization: userInfo?.code.accessToken
+    //             },
+    //             body: JSON.stringify(request)
+    //         })
+    //             .then((response) => response.json())
+    //             .then((result) => {
+    //                 console.log(JSON.stringify(result))
+    //                 if (result.code === 500) {
+    //                     Alert.alert("Agreement Signing", result.message, pic)
+    //                 } else {
+    //                     Alert.alert("Agreement Signing", result.message, pic)
+    //                     //   .then((okClicked)=>{
+    //                     //     if(okClicked){
+    //                     //       window.location.reload();
+    //                     //     }
+    //                     //   })
+    //                 }
+
+    //             })
+    //     },
+    //     logo: 'https://finsightventures.in/upcap/assets/dist/img/Logo.png',
+    //     theme: {
+    //         primaryColor: '#AB3498',
+    //         secondaryColor: '#000000'
+    //     }
+    // }
+
+    // useEffect(() => {
+        // const windowWidth = Dimensions.get('window');
+        // const digio = new window.Digio(options);
+        // digio.init();
+        // digio.submit(digioDocumentId, digioUserIdentifier, digioLoginToken);
+    // }, []);
+
+  
+
+
+    const onSuccess = (t) => {
+        setDigioDocumentId(t)
+        setDigioUserIdentifier(t)
+        setDigioLoginToken(t)
+        console.log(t + " Response from Digio SDK ");
+    }
+
+    const onCancel = () => {
+        console.log("Cancel Responsx`xe from Digio SDK ");
+    }
+
+
+    return (
+        <View>
+            <Text style={{ textAlign: 'center', color: 'black', }}>Onboarding</Text>
+
+
+            <Modal
+                style={styles.modalView}
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => setModalVisible(false)}
+            >
+                <View style={styles.centeredView}>
+
+
+                    <View style={{
+                        fontSize: 15, textAlign: 'center', paddingTop: 10,
+                        borderWidth: 1, borderColor: 'green', backgroundColor: 'white',
+                        marginHorizontal: 20
+                    }}>
+                        <Text style={{
+                            color: 'black', fontSize: 18, textAlign: 'center',
+                            paddingVertical: 15
+                        }}>Begin KYC</Text>
+                        <Text style={{ color: 'green', fontSize: 15, textAlign: 'center' }}>
+                            Please Note:
+                        </Text>
+                        <Text style={{ padding: 10 }}>If any of the PAN details displayed are inaccurate,
+                            do
+                            correct them.
+                        </Text>
+                        <View style={{ paddingVertical: 10 }}>
+                            <Button title='Ok' onPress={() => OnboardingBegin()} />
+                           
+                           
+                        </View>
+                        <View style={{ paddingBottom: 10 }}>
+                            <Button title='Close' onPress={() => setModalVisible(false)} />
+                        </View>
+                    </View>
+
+                </View>
+
+            </Modal>
+
+
+            <Card style={{ padding: 20, margin: 30, marginTop: 300 }}>
+                <View style={{ alignItems: 'center' }}>
+                    <Text style={{ textAlign: 'center' }}>Email:{initialData?.data?.customer_identifier}</Text>
+                    <TouchableOpacity  >
+                        <View style={{ backgroundColor: 'green', padding: 8, margin: 5, borderRadius: 10 }}>
 
 
                         </View>
-                    </Modal> 
+                    </TouchableOpacity>
+                    <Text>Begin Onboarding</Text>
+               
+                    
 
-                    <Card style={{padding: 20, margin: 30, marginTop: 300}}>
-                        <View style={{alignItems:'center'}}>
-                            <Text style={{textAlign: 'center'}}>Email:{initialData?.data?.customer_identifier}</Text>
-                            <TouchableOpacity  >
-                                <View style={{backgroundColor: 'green', padding: 8, margin: 5, borderRadius: 10}}>
-                                    <Text>Begin Onboarding</Text>
-                                    
-                                    {/* <DigioRNComponent
-      onSuccess={onSuccess}
-      onCancel={onCancel}
-      options={options}
-      digioDocumentId={digioDocumentId}
-      identifier={digioUserIdentifier}
-      digioToken={digioLoginToken}
-    /> */}
-                                </View>
-                            </TouchableOpacity>
-                        </View>
-                    </Card>
-    </View>
-  )
+                </View>
+                {
+                    initialData?.code === 200 ? (
+                        <>
+                        {/* <DigioRNComponent
+                            // digioScript={options}
+                            // javaScriptEnabled ={true}
+                            onSuccess={onSuccess}
+                            onCancel={onCancel}
+                            options={options}
+                            digioDocumentId={digioDocumentId}
+                            identifier={digioUserIdentifier}
+                            digioToken={digioLoginToken}
+                        /> */}
+                        <Digio/>
+                      </>
+                      
+                       
+                    ) : (
+                        <>
+                        </>
+                    )
+                }
+            </Card>
+
+        </View>
+    )
 }
 
 const styles = StyleSheet.create({

@@ -8,6 +8,9 @@ import { Picker } from '@react-native-picker/picker';
 import RNHTMLtoPDF from 'react-native-html-to-pdf'
 import RNFS from 'react-native-fs'
 import Share from 'react-native-share'
+import { ToastAndroid } from 'react-native';
+import { RefreshControl } from 'react-native';
+import { BASE_URL } from '../../constants/Config';
 
 
 
@@ -23,6 +26,7 @@ export default function WalletStatement() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortingOption, setSortingOption] = useState('default');
   const [pdfFilePath, setPdfFilePath] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
 
 
 
@@ -174,10 +178,38 @@ export default function WalletStatement() {
     }
   };
 
+  const onRefresh = React.useCallback(() => {
+    fetch( `${BASE_URL}/account/validate-jwt`, requestOptions)
+        .then(response => response.json()
+      ).then(result=>{                 
+            console.log('Check......',result)               
+            {
+                        if (result.data === null) {
+                            showToast('Session Expired.Login Again');
+                            
+                        }
+                        else {
+                            setRefreshing(true);
+                            setTimeout(() => {
+                                setRefreshing(false);
+
+                            }, 2000);
+                        }
+                    }
+        })
+        .catch(function (error) {
+            console.warn('Request failed', error)
+            
+        })
+}, []);
+const showToast = (message) => {
+ToastAndroid.show(message, ToastAndroid.LONG);
+};
 
   return (
     <>
-      <ScrollView>
+      <ScrollView  refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
         <View style={styles.container}>
           <Text style={styles.text1}>Wallet</Text>
           <View style={{ flexDirection: 'row', paddingHorizontal: 10 }}>
@@ -314,7 +346,7 @@ const styles = StyleSheet.create({
   },
   headers: {
     flex: 1,
-    backgroundColor: 'pink'
+    
   },
   footer: {
     flex: 0.2,

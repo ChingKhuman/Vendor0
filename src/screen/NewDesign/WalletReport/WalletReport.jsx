@@ -10,6 +10,9 @@ import { Picker } from '@react-native-picker/picker'
 import { Button } from 'react-native'
 import { SIZES } from '../../../constants/theme'
 import Spinner from 'react-native-loading-spinner-overlay'
+import { ToastAndroid } from 'react-native'
+import { RefreshControl } from 'react-native'
+import { Image } from 'react-native'
 
 const WalletReport = () => {
   const [settle, setSettle] = useState()
@@ -22,6 +25,7 @@ const WalletReport = () => {
   const [sortingOption, setSortingOption] = useState('Sort by');
   const [pdfFilePath, setPdfFilePath] = useState('');
   const [paginate, setpaginate] = useState(8);
+  const [refreshing, setRefreshing] = useState(false);
 
 
 
@@ -63,6 +67,34 @@ const WalletReport = () => {
   useEffect(() => {
     getData1()
   }, [])
+
+  const onRefresh = React.useCallback(() => {
+    fetch( `${BASE_URL}/account/validate-jwt`, requestOptions)
+        .then(response => response.json()
+      ).then(result=>{                 
+            // console.log('Check......',result)               
+            {
+                        if (result.data === null) {
+                            showToast('Session Expired.Login Again');
+                            
+                        }
+                        else {
+                            setRefreshing(true);
+                            setTimeout(() => {
+                                setRefreshing(false);
+
+                            }, 2000);
+                        }
+                    }
+        })
+        .catch(function (error) {
+            console.warn('Request failed', error)
+            
+        })
+}, []);
+const showToast = (message) => {
+ToastAndroid.show(message, ToastAndroid.LONG);
+};
 
   const data = Object.values(dataSettle || {});
   const search_parameters = Object.keys(Object.assign({}, ...data));
@@ -182,7 +214,12 @@ const WalletReport = () => {
 
 
     <>
-<ScrollView>
+     <Image
+                 source={require('../../../../assets/roseBackground.jpg')}
+                style={StyleSheet.absoluteFillObject}
+                blurRadius={80} />
+<ScrollView refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
 
 
 
@@ -266,6 +303,7 @@ const WalletReport = () => {
               <Button onPress={handleNextPage} disabled={currentPage === totalPages} title='Next' />
             </View> */}
             <Button title='Load more' onPress={load_more}/>
+            <Text style={{paddingHorizontal:10}}></Text>
             <Button title='Load less' onPress={load_less}/>
           </View>
 <View style={{marginVertical: 20}}>
@@ -303,8 +341,7 @@ const styles = StyleSheet.create({
   },
   text: {
     color: 'black',
-    fontFamily: 'serif',
-    fontWeight: 'bold'
+    fontFamily:'Calibri-bold',
 
   },
   content: {
@@ -317,7 +354,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 5,
     width: 85,
-    fontWeight: 'bold',
+    fontFamily:'Calibri-bold',
     borderWidth: 1,
     borderColor: '#000',
   },
@@ -327,9 +364,10 @@ const styles = StyleSheet.create({
     width: 15,
     borderWidth: 1,
     borderColor: '#000',
+    fontFamily:'Calibri-Regular',
   },
   text1: {
-    fontSize: 20, color: 'black', fontFamily: 'serif',
+    fontSize: 20, color: 'black', fontFamily:'Calibri-Regular',
     color: 'white'
   }
 

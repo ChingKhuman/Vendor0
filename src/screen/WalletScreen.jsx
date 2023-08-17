@@ -300,7 +300,8 @@ const styles = StyleSheet.create({
         borderColor: COLORS.lightGrey, borderRadius: 8
     },
     View3: { alignItems: 'center', height: 80, backgroundColor: COLORS.green },
-    Text1: { color: 'white', paddingVertical: 20, fontSize: 20 },
+    Text1: { color: 'white', paddingVertical: 20, fontSize: 20,
+    fontFamily:'Calibri-Regular', },
     View4: {
         alignItems: 'center', paddingTop: 20,
     },
@@ -340,7 +341,8 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         marginTop: 20,
         paddingVertical: 17,
-        borderRadius: 5
+        borderRadius: 5,
+        fontFamily:'Calibri-Regular',
 
     },
     textStyle1: {
@@ -348,7 +350,7 @@ const styles = StyleSheet.create({
         fontFamily: "sans-serif",
         backgroundColor: COLORS.green,
         color: 'black',
-        fontWeight: 'bold',
+        fontFamily:'Calibri-bold',
         textAlign: 'center',
         paddingHorizontal: 14,
         marginTop: 20,
@@ -357,7 +359,7 @@ const styles = StyleSheet.create({
 
     },
     modalText: {
-        fontFamily: ' sans',
+        fontFamily:'Calibri-Regular',
         color: 'black',
         textAlign: 'left',
         marginBottom: 15,

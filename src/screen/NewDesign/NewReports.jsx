@@ -6,6 +6,8 @@ import NewSettlement from './NewSettlement';
 import NewTds from './NewTds';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import WalletReport from './WalletReport/WalletReport';
+import { RefreshControl } from 'react-native';
+import { ToastAndroid } from 'react-native';
 
 
 const Tab = createBottomTabNavigator();
@@ -56,11 +58,14 @@ const CustomTab = () => (
       </Tab.Navigator>
 );
 
+
+
 export default function NewReports() {
 
     return (
 
-        <CustomTab />
+        <CustomTab 
+       />
 
       
     )

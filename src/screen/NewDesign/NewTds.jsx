@@ -12,6 +12,9 @@ import { Picker } from '@react-native-picker/picker';
 import RNHTMLtoPDF from 'react-native-html-to-pdf'
 import RNFS from 'react-native-fs'
 import Share from 'react-native-share'
+import { RefreshControl } from 'react-native';
+import { ToastAndroid } from 'react-native';
+import { Image } from 'react-native';
 
 
 
@@ -33,6 +36,7 @@ const NewTds = () => {
   const [currentPageNew, setCurrentPageNew] = useState(1);
   const [productsPerPage] = useState(4);
   const [sortOrder, setSortOrder] = useState('asc');
+  const [refreshing, setRefreshing] = useState(false);
 
 
 
@@ -124,6 +128,36 @@ const NewTds = () => {
 
   }, [])
 
+  
+  const onRefresh = React.useCallback(() => {
+    fetch( `${BASE_URL}/account/validate-jwt`, requestOptions)
+        .then(response => response.json()
+      ).then(result=>{                 
+            // console.log('Check......',result)               
+            {
+                        if (result.data === null) {
+                            showToast('Session Expired.Login Again');
+                            
+                        }
+                        else {
+                            setRefreshing(true);
+                            setTimeout(() => {
+                                setRefreshing(false);
+
+                            }, 2000);
+                        }
+                    }
+        })
+        .catch(function (error) {
+            console.warn('Request failed', error)
+            
+        })
+}, []);
+const showToast = (message) => {
+ToastAndroid.show(message, ToastAndroid.LONG);
+};
+
+
   //----------------------Search---------------------
 
   const handleSearch = (text) => {
@@ -169,7 +203,7 @@ const NewTds = () => {
   let tableData = tdsData?.slice(startIndex, endIndex);
 
   const filterData = tableData?.filter((item) => item.counterParty.toLowerCase().includes(searchQuery.toLowerCase()))
-  console.log(filterData)
+  // console.log(filterData)
 
 
 
@@ -246,7 +280,12 @@ const NewTds = () => {
   return (
 
     <>
-      <ScrollView>
+     <Image
+                source={require('../../../assets/roseBackground.jpg')}
+                style={StyleSheet.absoluteFillObject}
+                blurRadius={80} />
+      <ScrollView refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
 
       <TextInput style={{ borderWidth: 1, borderColor: 'black', marginTop: 10, marginHorizontal: 10 }}
         placeholder="Search"
@@ -298,7 +337,7 @@ const NewTds = () => {
               {filterData?.map((item, index) =>
                 <>
 
-                  <View style={{ flexDirection: 'row' }} key={index}>
+                  <View style={{ flexDirection: 'row' }} key={index.RefID}>
 
                     <Text style={styles.tableCell}>{item.invoiceRefID}</Text>
                     <Text style={styles.tableCell}>{item.investorName}</Text>
@@ -347,7 +386,7 @@ const NewTds = () => {
    
       <Spinner visible={loading} />
 
-      <View>
+      <View style={{marginVertical: 10}}>
         <Button title="Generate PDF" onPress={generatePDF} />
         {pdfFilePath !== '' && (
           <Button title="Download PDF" onPress={downloadPDF} />
@@ -355,7 +394,7 @@ const NewTds = () => {
       </View>
       <View style={styles.footer} >
         <Text style={{ color: 'black', textAlign: 'center', 
-        fontWeight: 'bold', paddingTop: 10, fontFamily: 'Georgia' }}>
+         fontFamily:'Calibri-bold', paddingVertical: 10,  }}>
           Copyright @ 2021-2022<Text style={{ color: 'blue' }}>UpCap.
           </Text>All right Reserved.</Text>
 
@@ -386,7 +425,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 5,
     width: 85,
-    fontWeight: 'bold',
+    fontFamily:'Calibri-bold',
     borderWidth: 1,
     borderColor: '#000',
   },
@@ -396,6 +435,7 @@ const styles = StyleSheet.create({
     width: 15,
     borderWidth: 1,
     borderColor: '#000',
+    fontFamily:'Calibri-Regular',
   },
   footer:
   {
@@ -406,14 +446,12 @@ const styles = StyleSheet.create({
     width: "100%",
     marginTop: 20,
     fontSize: 25,
-    fontWeight: "bold",
+    fontFamily:'Calibri-Regular',
     marginLeft: "10%",
   },
 
   text: {
-
-    fontFamily: 'serif',
-    fontWeight: 'bold',
+    fontFamily:'Calibri-bold',
     fontSize: 10
   },
 

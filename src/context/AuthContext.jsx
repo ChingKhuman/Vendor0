@@ -2,7 +2,10 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import React, { createContext, useEffect, useState } from "react";
 import { BASE_URL } from "../constants/Config";
-import { Alert } from "react-native";
+import { Alert, ToastAndroid } from "react-native";
+// import Toast from 'react-native-toast-message';
+
+
 
 
 
@@ -14,7 +17,8 @@ export const AuthProvider = ({ children }) => {
   const [userInfo, setUserInfo] = useState({});
   const [splashLoading, setSplashLoading] = useState(false)
 
-  const [errorMessage, setErrorMessage] = useState('');
+  const [user, setUser] = useState(null);
+  const [error, setError] = useState(null);
 
 
 
@@ -65,26 +69,57 @@ export const AuthProvider = ({ children }) => {
   //   .catch(error => console.log('error', error));    
   //  } 
   const login = async (userEmail, userPasswd) => {    
-    setLoading(true)
+     setLoading(true)
    try {
+    
     axios.post(`${BASE_URL}/account/login`,
     { userEmail, userPasswd }
   ).then(res => {
-    let userInfo = res.data;
-    // console.log("Checkdata...", userInfo)  
-       setUserInfo(userInfo)
+    let userInfo = res.data;   
+    //  console.log("Checkdata...", userInfo)  
+    //  if(userInfo.code ===200){
+    //   setUserInfo(userInfo)   
+      // showToast('Successfully Login');
+    //  }
+      if(res.error ===true){
+        showToast('Invalid Credential')
+     }
+     else if(userInfo?.code ===400){
+      showToast('Email/Password not match ')
+     }
+     else if(res?.data.status === 500){
+      showToast('Please field')
+     }
+     else{     
+      setUserInfo(userInfo)       
+      showToast('Successfully Login');
+     }
+     console.log('check',res?.data.status)
+      
+      //  Alert.alert(Successfull)
       AsyncStorage.setItem('userInfo', JSON.stringify(userInfo))
-      setLoading(false)
-  })
-  
-  // setErrorMessage('Invalid credentials. Please try again.');
-  setLoading(false)
+       setLoading(true)
+  })  
+  // setErrorMessage('Invalid credentials. Please try again.'); 
 }
     catch (error) {
-    console.log(error);
-   }
+      setError('Invalid credentials. Please try again.');
+    // Alert.alert('Please Insert Valid field')
+    showToast('Invalid credentials. Please try again');
+    // Toast.show({
+    //   type: 'error',
+    //   text1: 'Error',
+    //   text2: 'Failed reauest'
+    // })
+   } 
+    setLoading(false)
+   
 
   }
+
+  const showToast = (message) => {
+    ToastAndroid.show(message, ToastAndroid.LONG);
+  };
 
 
 // const login = async (values) => {
@@ -118,8 +153,8 @@ export const AuthProvider = ({ children }) => {
       await AsyncStorage.removeItem('userInfo');
       setUserInfo({})
      
-      Alert.alert('Logged out successfully!');
-      
+      // Alert.alert('');
+      showToast('Logged out successfully!');
 
     } catch (error) {
       console.log(`Error removing item: ${error}`);
@@ -172,7 +207,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
 
-    <AuthContext.Provider value={{ loading, userInfo, splashLoading, login, logout, Invoice, isloggedIn,errorMessage }}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={{ loading, userInfo, splashLoading, login, logout, Invoice, isloggedIn,user,error }}>{children}</AuthContext.Provider>
   )
 
 }

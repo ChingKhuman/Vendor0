@@ -1,4 +1,4 @@
-import { View, Text } from 'react-native'
+import { View, Text, RefreshControl, ToastAndroid } from 'react-native'
 import React from 'react'
 import { useContext } from 'react';
 import { AuthContext } from '../../../context/AuthContext';
@@ -17,6 +17,7 @@ const OnboardingHome = ({navigation}) => {
 
     const [initialData, setInitialData] = useState({});
     const [modalVisible, setModalVisible] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
 
     const { userInfo,  } = useContext(AuthContext);
     const token = userInfo.data?.accessToken;
@@ -39,6 +40,35 @@ const OnboardingHome = ({navigation}) => {
         })
         .catch(error => console.log('error', error));
 
+        const onRefresh = React.useCallback(() => {
+            fetch( `${BASE_URL}/account/validate-jwt`, requestOptions)
+                .then(response => response.json()
+              ).then(result=>{                 
+                     console.log('Check......',result)               
+                    {
+                                if (result.data !== null) {
+                                    showToast('Session Expired.Login Again');
+                                    
+                                }
+                                else {
+                                    setModalVisible(true)
+                                    setRefreshing(true);
+                                    setTimeout(() => {
+                                        setRefreshing(false);
+        
+                                    }, 2000);
+                                }
+                            }
+                })
+                .catch(function (error) {
+                    console.warn('Request failed', error)
+                    
+                })
+        }, []);
+        const showToast = (message) => {
+        ToastAndroid.show(message, ToastAndroid.LONG);
+        };
+
   return (
     <>
       
@@ -55,7 +85,7 @@ const OnboardingHome = ({navigation}) => {
 
                             <View style={{
                                     color: 'black', fontSize: 15, textAlign: 'center', paddingTop: 10,
-                                    borderWidth: 1, borderColor: 'white', backgroundColor: 'white'
+                                    borderWidth: 1, borderColor: 'white', backgroundColor: 'white',marginHorizontal:30
                                 }}>
                                 <Text style={{
                                     color: 'black', fontSize: 25, textAlign: 'center', paddingTop: 10,
@@ -85,7 +115,8 @@ const OnboardingHome = ({navigation}) => {
                     )
             }
 
-            <ScrollView>
+            <ScrollView refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
                 <View>
                 <View style={{
                         backgroundColor: 'white', marginVertical: 30, borderRadius: 5,
@@ -137,7 +168,7 @@ const OnboardingHome = ({navigation}) => {
                                     easing: "bounce"
                                 }}
                             >
-                                <VictoryBar
+                                {/* <VictoryBar
                                     style={{
                                         data: {
                                             fill: ({ datum }) =>
@@ -173,7 +204,7 @@ const OnboardingHome = ({navigation}) => {
                                         }
                                     }}
 
-                                />
+                                /> */}
                             </VictoryChart>
                            
 
@@ -229,7 +260,7 @@ const OnboardingHome = ({navigation}) => {
                                         easing: "bounce"
                                     }}
                                 >
-                                    <VictoryBar
+                                    {/* <VictoryBar
                                         // data={pieAData}
                                         // x='name'
                                         // y='totalOfferedAmount'
@@ -252,7 +283,7 @@ const OnboardingHome = ({navigation}) => {
                                                             : 'blue'
                                             }
                                         }}
-                                        labels={({ datum }) => datum.x} />
+                                        labels={({ datum }) => datum.x} /> */}
                                     {/* <VictoryAxis/> */}
                                    
                                 </VictoryChart>
@@ -294,7 +325,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         borderRadius: 20,
         padding: 20,
-        width: 350,
+        width: 300,
         shadowColor: '#000',
         shadowOffset: {
             width: 50,

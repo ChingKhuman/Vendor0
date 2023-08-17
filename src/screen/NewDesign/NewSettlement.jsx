@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect, useRef } from 'react';
-import {  StyleSheet, Text, View, Alert, ScrollView, Button, TextInput } from 'react-native';
+import {  StyleSheet, Text, View, Alert, ScrollView, Button, TextInput, TouchableOpacity } from 'react-native';
 import { BASE_URL } from '../../constants/Config';
 import Spinner from "react-native-loading-spinner-overlay/lib";
 import { AuthContext } from '../../context/AuthContext';
@@ -8,6 +8,17 @@ import { Picker } from '@react-native-picker/picker';
 import RNHTMLtoPDF from 'react-native-html-to-pdf'
 import RNFS from 'react-native-fs'
 import Share from 'react-native-share'
+import { ToastAndroid } from 'react-native';
+import { RefreshControl } from 'react-native';
+import { Image } from 'react-native';
+import XLSX from 'xlsx'
+import { Permission } from 'react-native-permissions';
+import { PermissionsAndroid } from 'react-native';
+import {writeFile, readFile, DowloadDirectoryPath} from 'react-native-fs'
+import axios from 'axios';
+import { Card } from 'react-native-paper';
+
+
 
 
 
@@ -25,6 +36,7 @@ const NewSettlement = () => {
   const [sortingOption, setSortingOption] = useState('Sort by');
   const [pdfFilePath, setPdfFilePath] = useState('');
   const [paginate, setpaginate] = useState(8);
+  const [refreshing, setRefreshing] = useState(false);
 
 
 
@@ -35,7 +47,7 @@ const NewSettlement = () => {
   var raw = "";
 
   var requestOptions = {
-    method: 'POST',
+    method: 'GET',
     headers: myHeaders,
     body: raw,
     redirect: 'follow'
@@ -67,7 +79,7 @@ const NewSettlement = () => {
 
   const getData1 = () => {
 
-    fetch(`${BASE_URL}/transaction/investor-transaction`, requestOptions)
+    fetch(`${BASE_URL}/transaction/getSettlementTransactiondetails`, requestOptions)
       .then(function (response) {
         if (response.ok) {
           return response.json();
@@ -129,7 +141,7 @@ const NewSettlement = () => {
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
 
 
-  const filteredData = dataSettle?.filter(item => item.transactionType.toLowerCase().includes(searchQuery.toLowerCase()))
+  const filteredData = dataSettle?.filter(item => item.userName.toLowerCase().includes(searchQuery.toLowerCase()))
   const tableData = filteredData?.slice(startIndex, endIndex);
 
 
@@ -210,19 +222,153 @@ const NewSettlement = () => {
     }
   };
 
+  const onRefresh = React.useCallback(() => {
+    fetch( `${BASE_URL}/account/validate-jwt`, requestOptions)
+        .then(response => response.json()
+      ).then(result=>{                 
+            // console.log('Check......',result)               
+            {
+                        if (result.data === null) {
+                            showToast('Session Expired.Login Again');
+                            
+                        }
+                        else {
+                            setRefreshing(true);
+                            setTimeout(() => {
+                                setRefreshing(false);
+
+                            }, 2000);
+                        }
+                    }
+        })
+        .catch(function (error) {
+            console.warn('Request failed', error)
+            
+        })
+}, []);
+const showToast = (message) => {
+ToastAndroid.show(message, ToastAndroid.LONG);
+};
+
+//----------------Download excel
+const [apiResponse, setApiResponse] = useState(null);
+
+const generateExcelData = (apiResponse) => {
+  const worksheet = XLSX.utils.json_to_sheet(apiResponse);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+  const excelData = XLSX.write(workbook, { bookType: 'xlsx', type: 'base64' });
+  return excelData;
+};
+
+const handleApiResponse = async () => {
+  var token = userInfo.data?.accessToken
+  var myHeaders = new Headers();
+  myHeaders.append("Authorization", token);
+
+  var raw = "";
+
+  var requestOptions1 = {
+    method: 'GET',
+    headers: myHeaders,
+    body: raw,
+    redirect: 'follow'
+  };
+
+  const response = await fetch( `${BASE_URL}/transaction/getSettlementTransactiondetails`, requestOptions1
+  );
+  const data = await response.json();
+  setApiResponse(data);
+
+const excelData = generateExcelData(data);
+
+const filePath = `${RNFetchBlob.fs.dirs.DownloadDir}/data.xlsx`;
+
+await RNFetchBlob.fs.writeFile(filePath, excelData, 'base64');
+}
+
+//----------------
+
+
+ const exportDataToExcel = () => {
   
+  let wb = XLSX.utils.book_new();
+  let ws = XLSX.utils.json_to_sheet(dataSettle)
+  XLSX.utils.book_append_sheet(wb,ws,'Users')
+  const wbout = XLSX.write(wb, {type:'binary', bookType:"xlsx"});
+
+  // Write generated excel to Storage
+  const excelFilePath = RNFS.ExternalStorageDirectoryPath + '/my_exported_file.xlsx';
+  console.log('Excel file path:', excelFilePath);
+
+  writeFile(RNFS.ExternalStorageDirectoryPath + '/my_exported_file.xlsx', wbout, 'ascii').then((r)=>{
+   console.log('Success');
+  }).catch((e)=>{
+    console.log('Error', e);
+  });
+
+}
+const handleClick = async () => {
+
+  try{
+    // Check for Permission (check if permission is already given or not)
+    let isPermitedExternalStorage = await PermissionsAndroid.check(
+      PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE);
+
+    if(!isPermitedExternalStorage){
+
+      // Ask for permission
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+        {
+          title: "Storage permission needed",
+          buttonNeutral: "Ask Me Later",
+          buttonNegative: "Cancel",
+          buttonPositive: "OK"
+        }
+      );
+
+      
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        // Permission Granted (calling our exportDataToExcel function)
+        exportDataToExcel();
+        Alert.alert("Permission granted");
+      } else {
+        // Permission denied
+        Alert.alert("Permission denied");
+      }
+    }else{
+       // Already have Permission (calling our exportDataToExcel function)
+       exportDataToExcel();
+    }
+  }catch(e){
+    console.log('Error while checking permission');
+    console.log(e);
+ }
+}
+
+
+
+
+
 
 
   return (
 
 
     <>
-<ScrollView>
+    <Image
+                source={require('../../../assets/roseBackground.jpg')}
+                style={StyleSheet.absoluteFillObject}
+                blurRadius={80} />
+<ScrollView refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
 
 
 
 
-      <TextInput
+     <Card style={{margin:8}}>
+     <TextInput
       style={{ borderWidth: 1, borderColor: 'black', marginTop: 10, marginHorizontal: 10 }}
         placeholder="Search"
         value={searchQuery}
@@ -245,9 +391,10 @@ const NewSettlement = () => {
         <Picker.Item label="High to low Amount" value="option2" />
         {/* Add more sorting options as needed */}
       </Picker>
+     </Card>
      
       <View style={{ alignItems: 'center', padding: 10, 
-      backgroundColor:'#5B5FB6' }}>
+      backgroundColor:'#5B5FB6' ,marginBottom: 10}}>
         <Text style={{ fontSize: SIZES.h2, textAlign: 'center' }}>Settlement</Text>
 
       </View>
@@ -273,13 +420,13 @@ const NewSettlement = () => {
             <View style={{ flexDirection: 'row' }} key={index}>
 
               <Text style={styles.tableCell}>{item.invoiceRefID}</Text>
-              <Text style={styles.tableCell}>{item.transactionType}</Text>
-              <Text style={styles.tableCell}> {item.transactionAmount}</Text>
-              <Text style={styles.tableCell}>{item.transactionDate}</Text>
-              <Text style={styles.tableCell}>{item.invoiceRefID}</Text>
-              <Text style={styles.tableCell}>{item.transactionType}</Text>
-              <Text style={styles.tableCell}> {item.transactionAmount}</Text>
-              <Text style={styles.tableCell}>{item.transactionDate}</Text>
+              <Text style={styles.tableCell}>{item.invoiceTenure}</Text>
+              <Text style={styles.tableCell}> {item.userName}</Text>
+              <Text style={styles.tableCell}>{item.invoicePaymentDue}</Text>
+              <Text style={styles.tableCell}>{item.SettlementDate}</Text>
+              <Text style={styles.tableCell}>{item.FundedAmount}</Text>
+              <Text style={styles.tableCell}> {item.GrossYield}</Text>
+              <Text style={styles.tableCell}>{item.TDS}</Text>
             </View>
           )}
      </View>
@@ -305,6 +452,7 @@ const NewSettlement = () => {
               <Button onPress={handleNextPage} disabled={currentPage === totalPages} title='Next' />
             </View> */}
             <Button title='Load more' onPress={load_more}/>
+            <Text style={{paddingHorizontal: 5}}></Text>
             <Button title='Load less' onPress={load_less}/>
           </View>
 <View style={{marginVertical: 20}}>
@@ -312,6 +460,8 @@ const NewSettlement = () => {
       {pdfFilePath !== '' && (
         <Button title="Download PDF" onPress={downloadPDF} />
       )}
+
+<Button title="Download Excel" onPress={handleClick} />
 </View>
 </ScrollView>
     </>
@@ -342,8 +492,7 @@ const styles = StyleSheet.create({
   },
   text: {
     color: 'black',
-    fontFamily: 'serif',
-    fontWeight: 'bold'
+    fontFamily:'Calibri-bold',
 
   },
   content: {
@@ -356,9 +505,11 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 5,
     width: 85,
-    fontWeight: 'bold',
+    // fontFamily:'Calibri-bold',
     borderWidth: 1,
     borderColor: '#000',
+    color:'black',
+    fontWeight:'bold'
   },
   tableCell: {
     flex: 1,
@@ -366,9 +517,10 @@ const styles = StyleSheet.create({
     width: 15,
     borderWidth: 1,
     borderColor: '#000',
+    fontFamily:'Calibri-Regular',
   },
   text1: {
-    fontSize: 20, color: 'black', fontFamily: 'serif',
+    fontSize: 20, color: 'black',  fontFamily:'Calibri-Regular',
     color: 'white'
   }
 
